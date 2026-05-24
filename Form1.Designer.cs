@@ -46,7 +46,7 @@
         private System.Windows.Forms.TextBox txtUsername;
         private System.Windows.Forms.TextBox txtPassword;
         private System.Windows.Forms.Button btnLogin;
-        private System.Windows.Forms.ListBox lstAnalysis;
+        private System.Windows.Forms.TextBox txtAnalysis;
         private System.Windows.Forms.Label lblAnalysisTitle;
 
         private void InitializeComponent()
@@ -76,7 +76,7 @@
             this.cbCategory = new System.Windows.Forms.ComboBox();
             this.panelRight = new System.Windows.Forms.Panel();
             this.lblAnalysisTitle = new System.Windows.Forms.Label();
-            this.lstAnalysis = new System.Windows.Forms.ListBox();
+            this.txtAnalysis = new System.Windows.Forms.TextBox();
             this.panelLeft.SuspendLayout();
             this.panelMiddle.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvEntries)).BeginInit();
@@ -179,7 +179,7 @@
             this.panelMiddle.Location = new System.Drawing.Point(153, 0);
             this.panelMiddle.Margin = new System.Windows.Forms.Padding(2);
             this.panelMiddle.Name = "panelMiddle";
-            this.panelMiddle.Size = new System.Drawing.Size(446, 427);
+            this.panelMiddle.Size = new System.Drawing.Size(543, 427);
             this.panelMiddle.TabIndex = 1;
             // 
             // dgvEntries
@@ -196,7 +196,7 @@
             this.dgvEntries.ReadOnly = true;
             this.dgvEntries.RowHeadersWidth = 72;
             this.dgvEntries.RowTemplate.Height = 23;
-            this.dgvEntries.Size = new System.Drawing.Size(513, 328);
+            this.dgvEntries.Size = new System.Drawing.Size(527, 328);
             this.dgvEntries.TabIndex = 0;
             this.dgvEntries.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgvEntries_CellFormatting);
             // 
@@ -330,7 +330,7 @@
             // 
             // btnResearch
             // 
-            this.btnResearch.Location = new System.Drawing.Point(338, 403);
+            this.btnResearch.Location = new System.Drawing.Point(425, 403);
             this.btnResearch.Margin = new System.Windows.Forms.Padding(2);
             this.btnResearch.Name = "btnResearch";
             this.btnResearch.Size = new System.Drawing.Size(106, 22);
@@ -341,6 +341,7 @@
             // 
             // cbCategory
             // 
+            this.cbCategory.Enabled = false;
             this.cbCategory.FormattingEnabled = true;
             this.cbCategory.Items.AddRange(new object[] {
             "월급",
@@ -354,18 +355,17 @@
             this.cbCategory.Margin = new System.Windows.Forms.Padding(2);
             this.cbCategory.Name = "cbCategory";
             this.cbCategory.Size = new System.Drawing.Size(78, 20);
-            this.cbCategory.Enabled = false;
             this.cbCategory.TabIndex = 15;
             // 
             // panelRight
             // 
             this.panelRight.Controls.Add(this.lblAnalysisTitle);
-            this.panelRight.Controls.Add(this.lstAnalysis);
+            this.panelRight.Controls.Add(this.txtAnalysis);
             this.panelRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelRight.Location = new System.Drawing.Point(599, 0);
+            this.panelRight.Location = new System.Drawing.Point(696, 0);
             this.panelRight.Margin = new System.Windows.Forms.Padding(2);
             this.panelRight.Name = "panelRight";
-            this.panelRight.Size = new System.Drawing.Size(165, 427);
+            this.panelRight.Size = new System.Drawing.Size(202, 427);
             this.panelRight.TabIndex = 2;
             // 
             // lblAnalysisTitle
@@ -379,27 +379,32 @@
             this.lblAnalysisTitle.TabIndex = 0;
             this.lblAnalysisTitle.Text = "지출 분석 결과";
             // 
-            // lstAnalysis
+            // txtAnalysis
             // 
-            this.lstAnalysis.ItemHeight = 12;
-            this.lstAnalysis.Location = new System.Drawing.Point(10, 25);
-            this.lstAnalysis.Margin = new System.Windows.Forms.Padding(2);
-            this.lstAnalysis.Name = "lstAnalysis";
-            this.lstAnalysis.Size = new System.Drawing.Size(147, 388);
-            this.lstAnalysis.TabIndex = 1;
+            this.txtAnalysis.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAnalysis.Location = new System.Drawing.Point(10, 25);
+            this.txtAnalysis.Margin = new System.Windows.Forms.Padding(2);
+            this.txtAnalysis.Multiline = true;
+            this.txtAnalysis.Name = "txtAnalysis";
+            this.txtAnalysis.ReadOnly = true;
+            this.txtAnalysis.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtAnalysis.Size = new System.Drawing.Size(184, 388);
+            this.txtAnalysis.TabIndex = 1;
             // 
             // Form1
             // 
+            this.AcceptButton = this.btnLogin;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(764, 427);
+            this.ClientSize = new System.Drawing.Size(898, 427);
             this.Controls.Add(this.panelMiddle);
             this.Controls.Add(this.panelLeft);
             this.Controls.Add(this.panelRight);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "가계부";
-            this.AcceptButton = this.btnLogin;
             this.panelLeft.ResumeLayout(false);
             this.panelLeft.PerformLayout();
             this.panelMiddle.ResumeLayout(false);
