@@ -5,12 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.IO;
-using System.Data;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data;
 
 namespace SmartAccountBook
 {
@@ -69,6 +69,13 @@ namespace SmartAccountBook
             UpdateTotal();
             // 입력 관련 컨트롤은 로그인 전 비활성화
             UpdateUiForLoginState(false);
+            try
+            {
+                // 디자이너에서 체크박스가 생성되어 있으면 초기 다크모드 적용
+                var cb = this.Controls.Find("chkDarkMode", true).FirstOrDefault() as CheckBox;
+                ApplyDarkMode(cb != null && cb.Checked);
+            }
+            catch { }
         }
 
         private void UpdateUiForLoginState(bool loggedIn)
@@ -390,7 +397,6 @@ namespace SmartAccountBook
             string abs = Math.Abs(v).ToString("N0");
             return (v < 0 ? "-" : "") + abs + "원";
         }
-
         private List<string> RecommendUsage(decimal balance, List<Tuple<string, decimal>> byCategory)
         {
             var rec = new List<string>();
@@ -411,12 +417,13 @@ namespace SmartAccountBook
             // 카테고리 기반 추가 권장
             if (byCategory != null && byCategory.Count > 0)
             {
+                var total = byCategory.Sum(x => x.Item2);
                 var top = byCategory.Take(3).ToList();
                 rec.Add("");
                 rec.Add("최근 많이 쓴 항목 기반 제안:");
                 foreach (var t in top)
                 {
-                    var percent = Math.Round((double)(t.Item2 / Math.Max(1, byCategory.Sum(x => x.Item2))) * 100, 0);
+                    double percent = total > 0 ? Math.Round((double)(t.Item2 / total) * 100, 0) : 0;
                     rec.Add($"- {t.Item1}: 최근 지출 비중 {percent}% 이므로 관련 비용 절감 또는 예산 재배치 고려");
                 }
             }
@@ -424,6 +431,89 @@ namespace SmartAccountBook
             rec.Add("");
             rec.Add("권장: 비상금은 최소 3개월 생활비 정도를 목표로 하세요.");
             return rec;
+        }
+
+        private void chkDarkMode_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                var cb = sender as CheckBox;
+                bool enabled = cb != null && cb.Checked;
+                ApplyDarkMode(enabled);
+            }
+            catch { }
+        }
+
+        private void ApplyDarkMode(bool dark)
+        {
+            try
+            {
+                if (dark)
+                {
+                    this.BackColor = Color.FromArgb(32, 32, 32);
+                    this.ForeColor = Color.White;
+                    if (dgvEntries != null)
+                    {
+                        dgvEntries.BackgroundColor = Color.FromArgb(24, 24, 24);
+                        dgvEntries.GridColor = Color.FromArgb(64, 64, 64);
+                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = Color.Black; } catch { }
+                    }
+                    try { if (btnLogin != null) btnLogin.ForeColor = Color.Black; } catch { }
+                    try { if (btnRegister != null) btnRegister.ForeColor = Color.Black; } catch { }
+                    try { if (btnResearch != null) btnResearch.ForeColor = Color.Black; } catch { }
+
+                    foreach (Control c in this.Controls)
+                    {
+                        try
+                        {
+                            if (c is Button b)
+                            {
+                                b.BackColor = Color.FromArgb(96, 96, 96);
+                                b.ForeColor = Color.Black;
+                            }
+                            else if (c is TextBox tb)
+                            {
+                                tb.BackColor = Color.FromArgb(96, 96, 96);
+                                tb.ForeColor = Color.Black;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+                else
+                {
+                    this.BackColor = SystemColors.Control;
+                    this.ForeColor = SystemColors.ControlText;
+                    if (dgvEntries != null)
+                    {
+                        dgvEntries.BackgroundColor = SystemColors.Window;
+                        dgvEntries.GridColor = SystemColors.ControlDark;
+                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = SystemColors.ControlText; } catch { }
+                    }
+                    try { if (btnLogin != null) btnLogin.ForeColor = SystemColors.ControlText; } catch { }
+                    try { if (btnRegister != null) btnRegister.ForeColor = SystemColors.ControlText; } catch { }
+                    try { if (btnResearch != null) btnResearch.ForeColor = SystemColors.ControlText; } catch { }
+
+                    foreach (Control c in this.Controls)
+                    {
+                        try
+                        {
+                            if (c is Button b)
+                            {
+                                b.BackColor = SystemColors.Control;
+                                b.ForeColor = SystemColors.ControlText;
+                            }
+                            else if (c is TextBox tb)
+                            {
+                                tb.BackColor = SystemColors.Window;
+                                tb.ForeColor = SystemColors.ControlText;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
         }
 
         [DataContract]
