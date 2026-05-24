@@ -36,9 +36,23 @@ namespace SmartAccountBook
             var colType = new DataGridViewTextBoxColumn { HeaderText = "구분", DataPropertyName = "Type", Width = 60 };
             var colCategory = new DataGridViewTextBoxColumn { HeaderText = "카테고리", DataPropertyName = "Category", Width = 100 };
             var colDesc = new DataGridViewTextBoxColumn { HeaderText = "메모", DataPropertyName = "Description", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill };
-            var colAmount = new DataGridViewTextBoxColumn { HeaderText = "금액", DataPropertyName = "Amount", Width = 120, DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleRight } };
+            var colAmount = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "금액",
+                DataPropertyName = "Amount",
+                Width = 120,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells,
+                MinimumWidth = 80,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Alignment = DataGridViewContentAlignment.MiddleRight,
+                    WrapMode = DataGridViewTriState.False
+                }
+            };
 
             dgvEntries.Columns.AddRange(new DataGridViewColumn[] { colDate, colType, colCategory, colDesc, colAmount });
+            // Use per-column sizing modes (do not override with a global AutoSizeColumnsMode)
+            dgvEntries.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             dgvEntries.DataSource = _transactions;
 
             _transactions.ListChanged += (s, e) => UpdateTotal();
@@ -140,19 +154,33 @@ namespace SmartAccountBook
             var expenses = _transactions.Where(t => t.Amount < 0).ToList();
             var byCat = expenses
                 .GroupBy(t => string.IsNullOrEmpty(t.Category) ? "미분류" : t.Category)
-                .Select(g => new { Category = g.Key, Total = -g.Sum(t => t.Amount) })
-                .OrderByDescending(x => x.Total)
+                .Select(g => Tuple.Create(g.Key, -g.Sum(t => t.Amount)))
+                .OrderByDescending(x => x.Item2)
                 .ToList();
 
-            lstAnalysis.Items.Clear();
+            var sb = new StringBuilder();
             decimal grand = 0;
             foreach (var c in byCat)
             {
-                grand += c.Total;
-                lstAnalysis.Items.Add($"{c.Category}: {FormatWon(c.Total)}");
+                grand += c.Item2;
+                sb.AppendLine($"{c.Item1}: {FormatWon(c.Item2)}");
             }
-            lstAnalysis.Items.Add("---------------------------");
-            lstAnalysis.Items.Add($"총지출: {FormatWon(grand)}");
+            sb.AppendLine("---------------------------");
+            sb.AppendLine($"총지출: {FormatWon(grand)}");
+
+            // 전체 잔액(남은 돈)을 계산하고 추천을 표시
+            decimal balance = _transactions.Sum(t => t.Amount);
+            sb.AppendLine($"남은돈: {FormatWon(balance)}");
+            sb.AppendLine();
+            var recs = RecommendUsage(balance, byCat);
+            sb.AppendLine("추천 사용처:");
+            foreach (var r in recs)
+            {
+                sb.AppendLine(r);
+            }
+
+            // 결과를 텍스트박스에 표시 (자동 줄바꿈 적용됨)
+            txtAnalysis.Text = sb.ToString();
         }
 
         private void cbType_SelectedIndexChanged(object sender, EventArgs e)
@@ -361,6 +389,41 @@ namespace SmartAccountBook
             long v = (long)Math.Round(value, 0);
             string abs = Math.Abs(v).ToString("N0");
             return (v < 0 ? "-" : "") + abs + "원";
+        }
+
+        private List<string> RecommendUsage(decimal balance, List<Tuple<string, decimal>> byCategory)
+        {
+            var rec = new List<string>();
+            if (balance <= 0)
+            {
+                rec.Add("현재 잔액이 없습니다. 지출을 줄이고 비상금 확보를 권장합니다.");
+                return rec;
+            }
+
+            // 기본 권장 비율: 저축 30%, 생활비 50%, 여유/기타 20%
+            decimal save = Math.Floor(balance * 0.30m);
+            decimal living = Math.Floor(balance * 0.50m);
+            decimal extra = balance - save - living;
+            rec.Add($"저축(권장 30%): {FormatWon(save)}");
+            rec.Add($"생활비(권장 50%): {FormatWon(living)}");
+            rec.Add($"여유/목적자금(약 20%): {FormatWon(extra)}");
+
+            // 카테고리 기반 추가 권장
+            if (byCategory != null && byCategory.Count > 0)
+            {
+                var top = byCategory.Take(3).ToList();
+                rec.Add("");
+                rec.Add("최근 많이 쓴 항목 기반 제안:");
+                foreach (var t in top)
+                {
+                    var percent = Math.Round((double)(t.Item2 / Math.Max(1, byCategory.Sum(x => x.Item2))) * 100, 0);
+                    rec.Add($"- {t.Item1}: 최근 지출 비중 {percent}% 이므로 관련 비용 절감 또는 예산 재배치 고려");
+                }
+            }
+
+            rec.Add("");
+            rec.Add("권장: 비상금은 최소 3개월 생활비 정도를 목표로 하세요.");
+            return rec;
         }
 
         [DataContract]
