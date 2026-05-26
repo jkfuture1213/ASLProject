@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace SmartAccountBook
 {
@@ -20,9 +22,11 @@ namespace SmartAccountBook
         private DateTime _lastAdd = DateTime.MinValue;
         private string _currentUser = null;
 
-        public Form1()
+
+        public Form1(string userID)
         {
             InitializeComponent();
+            _currentUser = userID;
 
             // 디자이너에서는 아래 런타임 초기화를 실행하지 않음
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
@@ -68,14 +72,7 @@ namespace SmartAccountBook
 
             UpdateTotal();
             // 입력 관련 컨트롤은 로그인 전 비활성화
-            UpdateUiForLoginState(false);
-            try
-            {
-                // 디자이너에서 체크박스가 생성되어 있으면 초기 다크모드 적용
-                var cb = this.Controls.Find("chkDarkMode", true).FirstOrDefault() as CheckBox;
-                ApplyDarkMode(cb != null && cb.Checked);
-            }
-            catch { }
+            //UpdateUiForLoginState(false);
         }
 
         private void UpdateUiForLoginState(bool loggedIn)
@@ -219,55 +216,6 @@ namespace SmartAccountBook
             catch { }
         }
 
-        private void btnLogin_Click(object sender, EventArgs e)
-        {
-            string user = txtUsername.Text.Trim();
-            string pass = txtPassword.Text;
-            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
-            {
-                MessageBox.Show("사용자명과 비밀번호를 입력하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (UsersStore.Validate(user, pass))
-            {
-                _currentUser = user;
-                MessageBox.Show("로그인 성공", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadUserTransactions();
-                UpdateUiForLoginState(true);
-                this.Text = $"가계부 - {_currentUser}";
-            }
-            else
-            {
-                MessageBox.Show("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        private void btnRegister_Click(object sender, EventArgs e)
-        {
-            using (var f = new RegisterForm())
-            {
-                if (f.ShowDialog() == DialogResult.OK)
-                {
-                    // Create user
-                    if (UsersStore.AddUser(f.Username, f.Password))
-                    {
-                        MessageBox.Show("회원가입 성공. 로그인 해주세요.", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("이미 존재하는 사용자입니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
-            }
-        }
-
-        // wrapper for designer btnSignUp Click
-        private void btnSignUp_Click(object sender, EventArgs e)
-        {
-            btnRegister_Click(sender, e);
-        }
-
         private void btnAdd_Click(object sender, EventArgs e)
         {
             var now = DateTime.Now;
@@ -343,7 +291,9 @@ namespace SmartAccountBook
             lblTotal.Text = $"총합: {FormatWon(total)}";
         }
 
-        private string JsonFilePath => Path.Combine(Application.StartupPath, "transactions.json");
+        private string JsonFilePath => Path.Combine(Application.StartupPath, $"{_currentUser}_transactions.json");
+
+        public string ID { get; }
 
         private void LoadTransactionsFromJson()
         {
@@ -397,6 +347,7 @@ namespace SmartAccountBook
             string abs = Math.Abs(v).ToString("N0");
             return (v < 0 ? "-" : "") + abs + "원";
         }
+
         private List<string> RecommendUsage(decimal balance, List<Tuple<string, decimal>> byCategory)
         {
             var rec = new List<string>();
@@ -417,13 +368,12 @@ namespace SmartAccountBook
             // 카테고리 기반 추가 권장
             if (byCategory != null && byCategory.Count > 0)
             {
-                var total = byCategory.Sum(x => x.Item2);
                 var top = byCategory.Take(3).ToList();
                 rec.Add("");
                 rec.Add("최근 많이 쓴 항목 기반 제안:");
                 foreach (var t in top)
                 {
-                    double percent = total > 0 ? Math.Round((double)(t.Item2 / total) * 100, 0) : 0;
+                    var percent = Math.Round((double)(t.Item2 / Math.Max(1, byCategory.Sum(x => x.Item2))) * 100, 0);
                     rec.Add($"- {t.Item1}: 최근 지출 비중 {percent}% 이므로 관련 비용 절감 또는 예산 재배치 고려");
                 }
             }
@@ -431,89 +381,6 @@ namespace SmartAccountBook
             rec.Add("");
             rec.Add("권장: 비상금은 최소 3개월 생활비 정도를 목표로 하세요.");
             return rec;
-        }
-
-        private void chkDarkMode_CheckedChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                var cb = sender as CheckBox;
-                bool enabled = cb != null && cb.Checked;
-                ApplyDarkMode(enabled);
-            }
-            catch { }
-        }
-
-        private void ApplyDarkMode(bool dark)
-        {
-            try
-            {
-                if (dark)
-                {
-                    this.BackColor = Color.FromArgb(32, 32, 32);
-                    this.ForeColor = Color.White;
-                    if (dgvEntries != null)
-                    {
-                        dgvEntries.BackgroundColor = Color.FromArgb(24, 24, 24);
-                        dgvEntries.GridColor = Color.FromArgb(64, 64, 64);
-                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = Color.Black; } catch { }
-                    }
-                    try { if (btnLogin != null) btnLogin.ForeColor = Color.Black; } catch { }
-                    try { if (btnRegister != null) btnRegister.ForeColor = Color.Black; } catch { }
-                    try { if (btnResearch != null) btnResearch.ForeColor = Color.Black; } catch { }
-
-                    foreach (Control c in this.Controls)
-                    {
-                        try
-                        {
-                            if (c is Button b)
-                            {
-                                b.BackColor = Color.FromArgb(96, 96, 96);
-                                b.ForeColor = Color.Black;
-                            }
-                            else if (c is TextBox tb)
-                            {
-                                tb.BackColor = Color.FromArgb(96, 96, 96);
-                                tb.ForeColor = Color.Black;
-                            }
-                        }
-                        catch { }
-                    }
-                }
-                else
-                {
-                    this.BackColor = SystemColors.Control;
-                    this.ForeColor = SystemColors.ControlText;
-                    if (dgvEntries != null)
-                    {
-                        dgvEntries.BackgroundColor = SystemColors.Window;
-                        dgvEntries.GridColor = SystemColors.ControlDark;
-                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = SystemColors.ControlText; } catch { }
-                    }
-                    try { if (btnLogin != null) btnLogin.ForeColor = SystemColors.ControlText; } catch { }
-                    try { if (btnRegister != null) btnRegister.ForeColor = SystemColors.ControlText; } catch { }
-                    try { if (btnResearch != null) btnResearch.ForeColor = SystemColors.ControlText; } catch { }
-
-                    foreach (Control c in this.Controls)
-                    {
-                        try
-                        {
-                            if (c is Button b)
-                            {
-                                b.BackColor = SystemColors.Control;
-                                b.ForeColor = SystemColors.ControlText;
-                            }
-                            else if (c is TextBox tb)
-                            {
-                                tb.BackColor = SystemColors.Window;
-                                tb.ForeColor = SystemColors.ControlText;
-                            }
-                        }
-                        catch { }
-                    }
-                }
-            }
-            catch { }
         }
 
         [DataContract]
