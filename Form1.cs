@@ -8,9 +8,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
 
 namespace SmartAccountBook
 {
@@ -20,42 +18,115 @@ namespace SmartAccountBook
         private DateTime _lastAdd = DateTime.MinValue;
         private string _currentUser = null;
 
+        // =========================================================
+        // ▼▼▼ 새로 추가한 로그인 제한 기능 ▼▼▼
+        // =========================================================
+
+        // 로그인 실패 횟수 저장
+        private int loginFailCount = 0;
+
+        // 로그인 제한 여부 확인
+        private bool isLocked = false;
+
+        // 로그인 제한 시작 시간 저장
+        private DateTime lockTime;
+
+        // =========================================================
+        // ▲▲▲ 새로 추가한 로그인 제한 기능 ▲▲▲
+        // =========================================================
+
         public Form1()
         {
             InitializeComponent();
 
+            // =========================================================
+            // ▼▼▼ 새로 추가한 초기 설정 ▼▼▼
+            // =========================================================
+
+            // 로그인 제한 타이머 시작
+            timerLoginLock.Start();
+
+            // 비밀번호 입력 시 * 표시
+            txtPassword.UseSystemPasswordChar = true;
+
+            // =========================================================
+            // ▲▲▲ 새로 추가한 초기 설정 ▲▲▲
+            // =========================================================
+
             // 디자이너에서는 아래 런타임 초기화를 실행하지 않음
-            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+            if (System.ComponentModel.LicenseManager.UsageMode ==
+                System.ComponentModel.LicenseUsageMode.Designtime)
                 return;
 
             // setup DataGridView columns and binding
             dgvEntries.AutoGenerateColumns = false;
             dgvEntries.Columns.Clear();
 
-            var colDate = new DataGridViewTextBoxColumn { HeaderText = "날짜", DataPropertyName = "Date", Width = 90 };
-            var colType = new DataGridViewTextBoxColumn { HeaderText = "구분", DataPropertyName = "Type", Width = 60 };
-            var colCategory = new DataGridViewTextBoxColumn { HeaderText = "카테고리", DataPropertyName = "Category", Width = 100 };
-            var colDesc = new DataGridViewTextBoxColumn { HeaderText = "메모", DataPropertyName = "Description", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill };
-            var colAmount = new DataGridViewTextBoxColumn
+            var colDate = new DataGridViewTextBoxColumn
             {
-                HeaderText = "금액",
-                DataPropertyName = "Amount",
-                Width = 120,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells,
-                MinimumWidth = 80,
-                DefaultCellStyle = new DataGridViewCellStyle
-                {
-                    Alignment = DataGridViewContentAlignment.MiddleRight,
-                    WrapMode = DataGridViewTriState.False
-                }
+                HeaderText = "날짜",
+                DataPropertyName = "Date",
+                Width = 90
             };
 
-            dgvEntries.Columns.AddRange(new DataGridViewColumn[] { colDate, colType, colCategory, colDesc, colAmount });
-            // Use per-column sizing modes (do not override with a global AutoSizeColumnsMode)
-            dgvEntries.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+            var colType = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "구분",
+                DataPropertyName = "Type",
+                Width = 60
+            };
+
+            var colCategory = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "카테고리",
+                DataPropertyName = "Category",
+                Width = 100
+            };
+
+            var colDesc = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "메모",
+                DataPropertyName = "Description",
+                AutoSizeMode =
+                    DataGridViewAutoSizeColumnMode.Fill
+            };
+
+            var colAmount =
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "금액",
+                    DataPropertyName = "Amount",
+                    Width = 120,
+                    AutoSizeMode =
+                        DataGridViewAutoSizeColumnMode.AllCells,
+                    MinimumWidth = 80,
+                    DefaultCellStyle =
+                        new DataGridViewCellStyle
+                        {
+                            Alignment =
+                                DataGridViewContentAlignment.MiddleRight,
+                            WrapMode =
+                                DataGridViewTriState.False
+                        }
+                };
+
+            dgvEntries.Columns.AddRange(
+                new DataGridViewColumn[]
+                {
+                    colDate,
+                    colType,
+                    colCategory,
+                    colDesc,
+                    colAmount
+                });
+
+            dgvEntries.AutoSizeColumnsMode =
+                DataGridViewAutoSizeColumnsMode.None;
+
             dgvEntries.DataSource = _transactions;
 
-            _transactions.ListChanged += (s, e) => UpdateTotal();
+            _transactions.ListChanged +=
+                (s, e) => UpdateTotal();
 
             try
             {
@@ -63,233 +134,337 @@ namespace SmartAccountBook
             }
             catch (Exception ex)
             {
-                MessageBox.Show("데이터 로드 오류: " + ex.Message);
+                MessageBox.Show(
+                    "데이터 로드 오류: " + ex.Message);
             }
 
             UpdateTotal();
-            // 입력 관련 컨트롤은 로그인 전 비활성화
+
             UpdateUiForLoginState(false);
+
             try
             {
-                // 디자이너에서 체크박스가 생성되어 있으면 초기 다크모드 적용
-                var cb = this.Controls.Find("chkDarkMode", true).FirstOrDefault() as CheckBox;
-                ApplyDarkMode(cb != null && cb.Checked);
+                var cb =
+                    this.Controls.Find(
+                        "chkDarkMode",
+                        true)
+                    .FirstOrDefault() as CheckBox;
+
+                ApplyDarkMode(
+                    cb != null && cb.Checked);
             }
             catch { }
         }
 
-        private void UpdateUiForLoginState(bool loggedIn)
+        private void UpdateUiForLoginState(
+            bool loggedIn)
         {
-            // 입력 가능한 컨트롤들만 활성/비활성 처리
             try
             {
                 dtpDate.Enabled = loggedIn;
+
                 cbType.Enabled = loggedIn;
-                // 카테고리는 로그인 상태이면서 구분이 '지출'으로 선택된 경우에만 활성화
+
                 try
                 {
-                    var sel = cbType?.SelectedItem as string;
-                    cbCategory.Enabled = loggedIn && string.Equals(sel, "지출");
+                    var sel =
+                        cbType?.SelectedItem as string;
+
+                    cbCategory.Enabled =
+                        loggedIn &&
+                        string.Equals(sel, "지출");
                 }
                 catch
                 {
                     cbCategory.Enabled = false;
                 }
+
                 txtDescription.Enabled = loggedIn;
+
                 nudAmount.Enabled = loggedIn;
+
                 btnAdd.Enabled = loggedIn;
+
                 btnDelete.Enabled = loggedIn;
+
                 dgvEntries.Enabled = loggedIn;
+
                 btnResearch.Enabled = loggedIn;
+
                 lblTotal.Enabled = loggedIn;
             }
-            catch
-            {
-                // 디자이너 로드 시 일부 컨트롤이 null일 수 있으니 무시
-            }
+            catch { }
         }
 
         private void LoadUserTransactions()
         {
-            _transactions.ListChanged -= (s, e) => UpdateTotal();
-            _transactions = new BindingList<Transaction>();
-            dgvEntries.DataSource = _transactions;
-            _transactions.ListChanged += (s, e) => UpdateTotal();
+            _transactions =
+                new BindingList<Transaction>();
 
-            if (string.IsNullOrEmpty(_currentUser)) return;
-            var path = UserTransactionsFile(_currentUser);
-            if (!File.Exists(path)) return;
+            dgvEntries.DataSource =
+                _transactions;
+
+            _transactions.ListChanged +=
+                (s, e) => UpdateTotal();
+
+            if (string.IsNullOrEmpty(_currentUser))
+                return;
+
+            var path =
+                UserTransactionsFile(_currentUser);
+
+            if (!File.Exists(path))
+                return;
+
             try
             {
-                using (var fs = File.OpenRead(path))
+                using (var fs =
+                    File.OpenRead(path))
                 {
-                    var ser = new DataContractJsonSerializer(typeof(List<Transaction>));
-                    var list = ser.ReadObject(fs) as List<Transaction>;
-                    if (list != null) foreach (var t in list) _transactions.Add(t);
+                    var ser =
+                        new DataContractJsonSerializer(
+                            typeof(List<Transaction>));
+
+                    var list =
+                        ser.ReadObject(fs)
+                        as List<Transaction>;
+
+                    if (list != null)
+                    {
+                        foreach (var t in list)
+                            _transactions.Add(t);
+                    }
                 }
             }
             catch { }
+
             UpdateTotal();
         }
 
         private void SaveUserTransactions()
         {
-            if (string.IsNullOrEmpty(_currentUser)) return;
-            var list = _transactions.ToList();
-            var path = UserTransactionsFile(_currentUser);
+            if (string.IsNullOrEmpty(_currentUser))
+                return;
+
+            var list =
+                _transactions.ToList();
+
+            var path =
+                UserTransactionsFile(_currentUser);
+
             try
             {
-                using (var fs = File.Create(path))
+                using (var fs =
+                    File.Create(path))
                 {
-                    var ser = new DataContractJsonSerializer(typeof(List<Transaction>));
+                    var ser =
+                        new DataContractJsonSerializer(
+                            typeof(List<Transaction>));
+
                     ser.WriteObject(fs, list);
                 }
             }
             catch { }
         }
 
-        private string UserTransactionsFile(string user)
+        private string UserTransactionsFile(
+            string user)
         {
-            var dir = Path.Combine(Application.StartupPath, "users");
+            var dir =
+                Path.Combine(
+                    Application.StartupPath,
+                    "users");
+
             Directory.CreateDirectory(dir);
-            return Path.Combine(dir, user + "_transactions.json");
+
+            return Path.Combine(
+                dir,
+                user + "_transactions.json");
         }
 
-        private void btnResearch_Click(object sender, EventArgs e)
+        private void btnLogin_Click(
+            object sender,
+            EventArgs e)
         {
-            // 지출(음수) 항목만 분석하여 카테고리별 합계를 표시
-            var expenses = _transactions.Where(t => t.Amount < 0).ToList();
-            var byCat = expenses
-                .GroupBy(t => string.IsNullOrEmpty(t.Category) ? "미분류" : t.Category)
-                .Select(g => Tuple.Create(g.Key, -g.Sum(t => t.Amount)))
-                .OrderByDescending(x => x.Item2)
-                .ToList();
+            // =========================================================
+            // ▼▼▼ 새로 추가한 로그인 제한 확인 ▼▼▼
+            // =========================================================
 
-            var sb = new StringBuilder();
-            decimal grand = 0;
-            foreach (var c in byCat)
+            // 로그인 제한 상태인지 확인
+            if (isLocked)
             {
-                grand += c.Item2;
-                sb.AppendLine($"{c.Item1}: {FormatWon(c.Item2)}");
-            }
-            sb.AppendLine("---------------------------");
-            sb.AppendLine($"총지출: {FormatWon(grand)}");
+                MessageBox.Show(
+                    "로그인이 제한되었습니다.");
 
-            // 전체 잔액(남은 돈)을 계산하고 추천을 표시
-            decimal balance = _transactions.Sum(t => t.Amount);
-            sb.AppendLine($"남은돈: {FormatWon(balance)}");
-            sb.AppendLine();
-            var recs = RecommendUsage(balance, byCat);
-            sb.AppendLine("추천 사용처:");
-            foreach (var r in recs)
-            {
-                sb.AppendLine(r);
+                return;
             }
 
-            // 결과를 텍스트박스에 표시 (자동 줄바꿈 적용됨)
-            txtAnalysis.Text = sb.ToString();
-        }
+            // =========================================================
+            // ▲▲▲ 새로 추가한 로그인 제한 확인 ▲▲▲
+            // =========================================================
 
-        private void cbType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            try
+            string user =
+                txtUsername.Text.Trim();
+
+            string pass =
+                txtPassword.Text;
+
+            if (string.IsNullOrEmpty(user) ||
+                string.IsNullOrEmpty(pass))
             {
-                var sel = cbType.SelectedItem as string;
-                if (string.IsNullOrEmpty(sel))
-                {
-                    // 타입이 선택되지 않았으면 카테고리 비활성화
-                    cbCategory.Enabled = false;
-                    return;
-                }
+                MessageBox.Show(
+                    "사용자명과 비밀번호를 입력하세요.",
+                    "경고",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
 
-                if (sel == "수입")
-                {
-                    // 수입이면 카테고리는 월급으로 설정하고 비활성화
-                    if (!cbCategory.Items.Contains("월급")) cbCategory.Items.Insert(0, "월급");
-                    cbCategory.SelectedItem = "월급";
-                    cbCategory.Enabled = false;
-                }
-                else
-                {
-                    // 지출이면 카테고리 활성화
-                    cbCategory.Enabled = true;
-                    if (cbCategory.Items.Count > 0 && cbCategory.SelectedItem == null) cbCategory.SelectedIndex = 0;
-                }
-            }
-            catch { }
-        }
-
-        private void btnLogin_Click(object sender, EventArgs e)
-        {
-            string user = txtUsername.Text.Trim();
-            string pass = txtPassword.Text;
-            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
-            {
-                MessageBox.Show("사용자명과 비밀번호를 입력하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (UsersStore.Validate(user, pass))
             {
+                // =========================================================
+                // ▼▼▼ 새로 추가한 로그인 성공 처리 ▼▼▼
+                // =========================================================
+
+                // 로그인 성공 시 실패 횟수 초기화
+                loginFailCount = 0;
+
+                // 로그인 실패 경고문 숨김
+                lblWarning.Visible = false;
+
+                // =========================================================
+                // ▲▲▲ 새로 추가한 로그인 성공 처리 ▲▲▲
+                // =========================================================
+
                 _currentUser = user;
-                MessageBox.Show("로그인 성공", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                MessageBox.Show(
+                    "로그인 성공",
+                    "정보",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
                 LoadUserTransactions();
+
                 UpdateUiForLoginState(true);
-                this.Text = $"가계부 - {_currentUser}";
+
+                this.Text =
+                    $"가계부 - {_currentUser}";
             }
             else
             {
-                MessageBox.Show("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.",
+                    "경고",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                // =========================================================
+                // ▼▼▼ 새로 추가한 로그인 실패 제한 기능 ▼▼▼
+                // =========================================================
+
+                // 로그인 실패 횟수 증가
+                loginFailCount++;
+
+                // 5회 이상 실패 시 로그인 제한
+                if (loginFailCount >= 5)
+                {
+                    // 로그인 제한 활성화
+                    isLocked = true;
+
+                    // 제한 시작 시간 저장
+                    lockTime = DateTime.Now;
+
+                    // 로그인 버튼 비활성화
+                    btnLogin.Enabled = false;
+
+                    // 경고문 표시
+                    lblWarning.Visible = true;
+                }
+
+                // =========================================================
+                // ▲▲▲ 새로 추가한 로그인 실패 제한 기능 ▲▲▲
+                // =========================================================
             }
         }
 
-        private void btnRegister_Click(object sender, EventArgs e)
+        private void btnRegister_Click(
+            object sender,
+            EventArgs e)
         {
-            using (var f = new RegisterForm())
+            using (var f =
+                new RegisterForm())
             {
-                if (f.ShowDialog() == DialogResult.OK)
+                if (f.ShowDialog() ==
+                    DialogResult.OK)
                 {
-                    // Create user
-                    if (UsersStore.AddUser(f.Username, f.Password))
+                    if (UsersStore.AddUser(
+                        f.Username,
+                        f.Password))
                     {
-                        MessageBox.Show("회원가입 성공. 로그인 해주세요.", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(
+                            "회원가입 성공. 로그인 해주세요.",
+                            "정보",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
                     }
                     else
                     {
-                        MessageBox.Show("이미 존재하는 사용자입니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show(
+                            "이미 존재하는 사용자입니다.",
+                            "경고",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
                     }
                 }
             }
         }
 
-        // wrapper for designer btnSignUp Click
-        private void btnSignUp_Click(object sender, EventArgs e)
+        private void btnSignUp_Click(
+            object sender,
+            EventArgs e)
         {
             btnRegister_Click(sender, e);
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void btnAdd_Click(
+            object sender,
+            EventArgs e)
         {
             var now = DateTime.Now;
-            if ((now - _lastAdd).TotalMilliseconds < 500) return;
+
+            if ((now - _lastAdd)
+                .TotalMilliseconds < 500)
+                return;
+
             _lastAdd = now;
 
             btnAdd.Enabled = false;
+
             try
             {
-                DateTime date = dtpDate.Value.Date;
-                string type = cbType.SelectedItem as string ?? "지출";
-                string category = cbCategory.SelectedItem as string ?? "식비";
-                string desc = txtDescription.Text.Trim();
-                decimal amount = nudAmount.Value;
+                DateTime date =
+                    dtpDate.Value.Date;
 
-                // ignore adding if amount is zero and no description/category
-                if (amount == 0 && string.IsNullOrEmpty(category) && string.IsNullOrEmpty(desc))
-                    return;
+                string type =
+                    cbType.SelectedItem as string
+                    ?? "지출";
 
-                // 지출이면 금액을 음수로 저장하여 총합 계산에 반영
-                if (type == "지출") amount = -Math.Abs(amount);
-                else amount = Math.Abs(amount);
+                string category =
+                    cbCategory.SelectedItem as string
+                    ?? "식비";
+
+                string desc =
+                    txtDescription.Text.Trim();
+
+                decimal amount =
+                    nudAmount.Value;
+
+                if (type == "지출")
+                    amount = -Math.Abs(amount);
+                else
+                    amount = Math.Abs(amount);
 
                 var t = new Transaction
                 {
@@ -301,10 +476,11 @@ namespace SmartAccountBook
                 };
 
                 _transactions.Add(t);
-                try { SaveUserTransactions(); } catch { }
 
-                // 입력 필드 초기화
+                SaveUserTransactions();
+
                 txtDescription.Clear();
+
                 nudAmount.Value = 0;
             }
             finally
@@ -313,11 +489,14 @@ namespace SmartAccountBook
             }
         }
 
-        private void btnDelete_Click(object sender, EventArgs e)
+        private void btnDelete_Click(
+            object sender,
+            EventArgs e)
         {
             if (dgvEntries.SelectedRows.Count > 0)
             {
-                var toRemove = dgvEntries.SelectedRows
+                var toRemove =
+                    dgvEntries.SelectedRows
                     .Cast<DataGridViewRow>()
                     .Select(r => r.DataBoundItem)
                     .OfType<Transaction>()
@@ -327,118 +506,125 @@ namespace SmartAccountBook
                 {
                     _transactions.Remove(t);
                 }
-                try { SaveUserTransactions(); } catch { }
-            }
-            else if (_transactions.Count > 0)
-            {
-                var last = _transactions[_transactions.Count - 1];
-                _transactions.RemoveAt(_transactions.Count - 1);
-                try { SaveUserTransactions(); } catch { }
+
+                SaveUserTransactions();
             }
         }
 
         private void UpdateTotal()
         {
-            decimal total = _transactions.Sum(t => t.Amount);
-            lblTotal.Text = $"총합: {FormatWon(total)}";
+            decimal total =
+                _transactions.Sum(t => t.Amount);
+
+            lblTotal.Text =
+                $"총합: {FormatWon(total)}";
         }
 
-        private string JsonFilePath => Path.Combine(Application.StartupPath, "transactions.json");
+        private string JsonFilePath =>
+            Path.Combine(
+                Application.StartupPath,
+                "transactions.json");
 
         private void LoadTransactionsFromJson()
         {
             _transactions.Clear();
-            if (!File.Exists(JsonFilePath)) return;
-            using (var fs = File.OpenRead(JsonFilePath))
+
+            if (!File.Exists(JsonFilePath))
+                return;
+
+            using (var fs =
+                File.OpenRead(JsonFilePath))
             {
-                var ser = new DataContractJsonSerializer(typeof(List<Transaction>));
-                var list = ser.ReadObject(fs) as List<Transaction>;
+                var ser =
+                    new DataContractJsonSerializer(
+                        typeof(List<Transaction>));
+
+                var list =
+                    ser.ReadObject(fs)
+                    as List<Transaction>;
+
                 if (list != null)
                 {
-                    foreach (var t in list) _transactions.Add(t);
+                    foreach (var t in list)
+                        _transactions.Add(t);
                 }
-            }
-        }
-
-        private void SaveTransactionsToJson()
-        {
-            var list = _transactions.ToList();
-            using (var fs = File.Create(JsonFilePath))
-            {
-                var ser = new DataContractJsonSerializer(typeof(List<Transaction>));
-                ser.WriteObject(fs, list);
-            }
-        }
-
-        private void dgvEntries_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            var dgv = sender as DataGridView;
-            if (dgv == null || e.ColumnIndex < 0) return;
-
-            var col = dgv.Columns[e.ColumnIndex];
-            if (col.DataPropertyName == "Amount" && e.Value != null)
-            {
-                if (e.Value is decimal dec) e.Value = FormatWon(dec);
-                else if (decimal.TryParse(e.Value.ToString(), out dec)) e.Value = FormatWon(dec);
-                e.FormattingApplied = true;
-            }
-
-            if (col.DataPropertyName == "Date" && e.Value != null)
-            {
-                if (e.Value is DateTime dt) e.Value = dt.ToString("yyyy-MM-dd");
-                e.FormattingApplied = true;
             }
         }
 
         private string FormatWon(decimal value)
         {
-            // 정수 단위로 처리, 음수 처리 포함
-            long v = (long)Math.Round(value, 0);
-            string abs = Math.Abs(v).ToString("N0");
-            return (v < 0 ? "-" : "") + abs + "원";
+            long v =
+                (long)Math.Round(value, 0);
+
+            string abs =
+                Math.Abs(v).ToString("N0");
+
+            return (v < 0 ? "-" : "")
+                + abs + "원";
         }
-        private List<string> RecommendUsage(decimal balance, List<Tuple<string, decimal>> byCategory)
+
+        // =========================================================
+        // ▼▼▼ 새로 추가한 비밀번호 보기 기능 ▼▼▼
+        // =========================================================
+
+        private void btnShowPassword_Click(
+            object sender,
+            EventArgs e)
         {
-            var rec = new List<string>();
-            if (balance <= 0)
-            {
-                rec.Add("현재 잔액이 없습니다. 지출을 줄이고 비상금 확보를 권장합니다.");
-                return rec;
-            }
+            txtPassword.UseSystemPasswordChar =
+                !txtPassword.UseSystemPasswordChar;
+        }
 
-            // 기본 권장 비율: 저축 30%, 생활비 50%, 여유/기타 20%
-            decimal save = Math.Floor(balance * 0.30m);
-            decimal living = Math.Floor(balance * 0.50m);
-            decimal extra = balance - save - living;
-            rec.Add($"저축(권장 30%): {FormatWon(save)}");
-            rec.Add($"생활비(권장 50%): {FormatWon(living)}");
-            rec.Add($"여유/목적자금(약 20%): {FormatWon(extra)}");
+        // =========================================================
+        // ▲▲▲ 새로 추가한 비밀번호 보기 기능 ▲▲▲
+        // =========================================================
 
-            // 카테고리 기반 추가 권장
-            if (byCategory != null && byCategory.Count > 0)
+        // =========================================================
+        // ▼▼▼ 새로 추가한 로그인 제한 타이머 ▼▼▼
+        // =========================================================
+
+        private void timerLoginLock_Tick(
+            object sender,
+            EventArgs e)
+        {
+            if (isLocked)
             {
-                var total = byCategory.Sum(x => x.Item2);
-                var top = byCategory.Take(3).ToList();
-                rec.Add("");
-                rec.Add("최근 많이 쓴 항목 기반 제안:");
-                foreach (var t in top)
+                TimeSpan diff =
+                    DateTime.Now - lockTime;
+
+                // 5분 후 로그인 제한 해제
+                if (diff.TotalMinutes >= 5)
                 {
-                    double percent = total > 0 ? Math.Round((double)(t.Item2 / total) * 100, 0) : 0;
-                    rec.Add($"- {t.Item1}: 최근 지출 비중 {percent}% 이므로 관련 비용 절감 또는 예산 재배치 고려");
+                    isLocked = false;
+
+                    loginFailCount = 0;
+
+                    btnLogin.Enabled = true;
+
+                    lblWarning.Visible = false;
+
+                    MessageBox.Show(
+                        "로그인 제한이 해제되었습니다.");
                 }
             }
-
-            rec.Add("");
-            rec.Add("권장: 비상금은 최소 3개월 생활비 정도를 목표로 하세요.");
-            return rec;
         }
 
-        private void chkDarkMode_CheckedChanged(object sender, EventArgs e)
+        // =========================================================
+        // ▲▲▲ 새로 추가한 로그인 제한 타이머 ▲▲▲
+        // =========================================================
+
+        private void chkDarkMode_CheckedChanged(
+            object sender,
+            EventArgs e)
         {
             try
             {
-                var cb = sender as CheckBox;
-                bool enabled = cb != null && cb.Checked;
+                var cb =
+                    sender as CheckBox;
+
+                bool enabled =
+                    cb != null && cb.Checked;
+
                 ApplyDarkMode(enabled);
             }
             catch { }
@@ -446,74 +632,22 @@ namespace SmartAccountBook
 
         private void ApplyDarkMode(bool dark)
         {
-            try
+            if (dark)
             {
-                if (dark)
-                {
-                    this.BackColor = Color.FromArgb(32, 32, 32);
-                    this.ForeColor = Color.White;
-                    if (dgvEntries != null)
-                    {
-                        dgvEntries.BackgroundColor = Color.FromArgb(24, 24, 24);
-                        dgvEntries.GridColor = Color.FromArgb(64, 64, 64);
-                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = Color.Black; } catch { }
-                    }
-                    try { if (btnLogin != null) btnLogin.ForeColor = Color.Black; } catch { }
-                    try { if (btnRegister != null) btnRegister.ForeColor = Color.Black; } catch { }
-                    try { if (btnResearch != null) btnResearch.ForeColor = Color.Black; } catch { }
+                this.BackColor =
+                    Color.FromArgb(32, 32, 32);
 
-                    foreach (Control c in this.Controls)
-                    {
-                        try
-                        {
-                            if (c is Button b)
-                            {
-                                b.BackColor = Color.FromArgb(96, 96, 96);
-                                b.ForeColor = Color.Black;
-                            }
-                            else if (c is TextBox tb)
-                            {
-                                tb.BackColor = Color.FromArgb(96, 96, 96);
-                                tb.ForeColor = Color.Black;
-                            }
-                        }
-                        catch { }
-                    }
-                }
-                else
-                {
-                    this.BackColor = SystemColors.Control;
-                    this.ForeColor = SystemColors.ControlText;
-                    if (dgvEntries != null)
-                    {
-                        dgvEntries.BackgroundColor = SystemColors.Window;
-                        dgvEntries.GridColor = SystemColors.ControlDark;
-                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = SystemColors.ControlText; } catch { }
-                    }
-                    try { if (btnLogin != null) btnLogin.ForeColor = SystemColors.ControlText; } catch { }
-                    try { if (btnRegister != null) btnRegister.ForeColor = SystemColors.ControlText; } catch { }
-                    try { if (btnResearch != null) btnResearch.ForeColor = SystemColors.ControlText; } catch { }
-
-                    foreach (Control c in this.Controls)
-                    {
-                        try
-                        {
-                            if (c is Button b)
-                            {
-                                b.BackColor = SystemColors.Control;
-                                b.ForeColor = SystemColors.ControlText;
-                            }
-                            else if (c is TextBox tb)
-                            {
-                                tb.BackColor = SystemColors.Window;
-                                tb.ForeColor = SystemColors.ControlText;
-                            }
-                        }
-                        catch { }
-                    }
-                }
+                this.ForeColor =
+                    Color.White;
             }
-            catch { }
+            else
+            {
+                this.BackColor =
+                    SystemColors.Control;
+
+                this.ForeColor =
+                    SystemColors.ControlText;
+            }
         }
 
         [DataContract]
@@ -521,14 +655,19 @@ namespace SmartAccountBook
         {
             [DataMember]
             public int Id { get; set; }
+
             [DataMember]
             public DateTime Date { get; set; }
+
             [DataMember]
             public string Type { get; set; }
+
             [DataMember]
             public string Category { get; set; }
+
             [DataMember]
             public string Description { get; set; }
+
             [DataMember]
             public decimal Amount { get; set; }
         }
