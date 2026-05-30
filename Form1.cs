@@ -3,26 +3,31 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace SmartAccountBook
 {
     public partial class Form1 : Form
     {
+        public static List<decimal> incomeList = new List<decimal>();
+        public static List<decimal> spendList = new List<decimal>();
         private BindingList<Transaction> _transactions = new BindingList<Transaction>();
         private DateTime _lastAdd = DateTime.MinValue;
         private string _currentUser = null;
 
-        public Form1()
+
+        public Form1(string userID)
         {
             InitializeComponent();
+            _currentUser = userID;
 
             // 디자이너에서는 아래 런타임 초기화를 실행하지 않음
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
@@ -68,14 +73,7 @@ namespace SmartAccountBook
 
             UpdateTotal();
             // 입력 관련 컨트롤은 로그인 전 비활성화
-            UpdateUiForLoginState(false);
-            try
-            {
-                // 디자이너에서 체크박스가 생성되어 있으면 초기 다크모드 적용
-                var cb = this.Controls.Find("chkDarkMode", true).FirstOrDefault() as CheckBox;
-                ApplyDarkMode(cb != null && cb.Checked);
-            }
-            catch { }
+            //UpdateUiForLoginState(false);
         }
 
         private void UpdateUiForLoginState(bool loggedIn)
@@ -108,7 +106,6 @@ namespace SmartAccountBook
                 // 디자이너 로드 시 일부 컨트롤이 null일 수 있으니 무시
             }
         }
-
         private void LoadUserTransactions()
         {
             _transactions.ListChanged -= (s, e) => UpdateTotal();
@@ -130,6 +127,7 @@ namespace SmartAccountBook
             }
             catch { }
             UpdateTotal();
+            UpdateLists();
         }
 
         private void SaveUserTransactions()
@@ -219,55 +217,6 @@ namespace SmartAccountBook
             catch { }
         }
 
-        private void btnLogin_Click(object sender, EventArgs e)
-        {
-            string user = txtUsername.Text.Trim();
-            string pass = txtPassword.Text;
-            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
-            {
-                MessageBox.Show("사용자명과 비밀번호를 입력하세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (UsersStore.Validate(user, pass))
-            {
-                _currentUser = user;
-                MessageBox.Show("로그인 성공", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadUserTransactions();
-                UpdateUiForLoginState(true);
-                this.Text = $"가계부 - {_currentUser}";
-            }
-            else
-            {
-                MessageBox.Show("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        private void btnRegister_Click(object sender, EventArgs e)
-        {
-            using (var f = new RegisterForm())
-            {
-                if (f.ShowDialog() == DialogResult.OK)
-                {
-                    // Create user
-                    if (UsersStore.AddUser(f.Username, f.Password))
-                    {
-                        MessageBox.Show("회원가입 성공. 로그인 해주세요.", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("이미 존재하는 사용자입니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
-            }
-        }
-
-        // wrapper for designer btnSignUp Click
-        private void btnSignUp_Click(object sender, EventArgs e)
-        {
-            btnRegister_Click(sender, e);
-        }
-
         private void btnAdd_Click(object sender, EventArgs e)
         {
             var now = DateTime.Now;
@@ -306,11 +255,13 @@ namespace SmartAccountBook
                 // 입력 필드 초기화
                 txtDescription.Clear();
                 nudAmount.Value = 0;
+                UpdateLists();
             }
             finally
             {
                 btnAdd.Enabled = true;
             }
+            UpdateLists();
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -335,6 +286,7 @@ namespace SmartAccountBook
                 _transactions.RemoveAt(_transactions.Count - 1);
                 try { SaveUserTransactions(); } catch { }
             }
+            UpdateLists();
         }
 
         private void UpdateTotal()
@@ -342,8 +294,21 @@ namespace SmartAccountBook
             decimal total = _transactions.Sum(t => t.Amount);
             lblTotal.Text = $"총합: {FormatWon(total)}";
         }
+        private string JsonFilePath
+        {
+            get
+            {
+                string folder = Path.Combine(Application.StartupPath, "users");
 
-        private string JsonFilePath => Path.Combine(Application.StartupPath, "transactions.json");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                return Path.Combine(folder, $"{_currentUser}_transactions.json");
+            }
+        }
+        public string ID { get; }
 
         private void LoadTransactionsFromJson()
         {
@@ -358,16 +323,7 @@ namespace SmartAccountBook
                     foreach (var t in list) _transactions.Add(t);
                 }
             }
-        }
-
-        private void SaveTransactionsToJson()
-        {
-            var list = _transactions.ToList();
-            using (var fs = File.Create(JsonFilePath))
-            {
-                var ser = new DataContractJsonSerializer(typeof(List<Transaction>));
-                ser.WriteObject(fs, list);
-            }
+            UpdateLists();
         }
 
         private void dgvEntries_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -397,6 +353,7 @@ namespace SmartAccountBook
             string abs = Math.Abs(v).ToString("N0");
             return (v < 0 ? "-" : "") + abs + "원";
         }
+
         private List<string> RecommendUsage(decimal balance, List<Tuple<string, decimal>> byCategory)
         {
             var rec = new List<string>();
@@ -417,13 +374,12 @@ namespace SmartAccountBook
             // 카테고리 기반 추가 권장
             if (byCategory != null && byCategory.Count > 0)
             {
-                var total = byCategory.Sum(x => x.Item2);
                 var top = byCategory.Take(3).ToList();
                 rec.Add("");
                 rec.Add("최근 많이 쓴 항목 기반 제안:");
                 foreach (var t in top)
                 {
-                    double percent = total > 0 ? Math.Round((double)(t.Item2 / total) * 100, 0) : 0;
+                    var percent = Math.Round((double)(t.Item2 / Math.Max(1, byCategory.Sum(x => x.Item2))) * 100, 0);
                     rec.Add($"- {t.Item1}: 최근 지출 비중 {percent}% 이므로 관련 비용 절감 또는 예산 재배치 고려");
                 }
             }
@@ -433,87 +389,48 @@ namespace SmartAccountBook
             return rec;
         }
 
-        private void chkDarkMode_CheckedChanged(object sender, EventArgs e)
+        private void UpdateLists()
         {
-            try
+            incomeList.Clear();
+            spendList.Clear();
+            foreach (var t in _transactions)
             {
-                var cb = sender as CheckBox;
-                bool enabled = cb != null && cb.Checked;
-                ApplyDarkMode(enabled);
+                if (t.Amount > 0) incomeList.Add(t.Amount);
+                else if (t.Amount < 0) spendList.Add(t.Amount);
             }
-            catch { }
+            ApplyFilter();
         }
 
-        private void ApplyDarkMode(bool dark)
+        private void btnGraph_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (dark)
-                {
-                    this.BackColor = Color.FromArgb(32, 32, 32);
-                    this.ForeColor = Color.White;
-                    if (dgvEntries != null)
-                    {
-                        dgvEntries.BackgroundColor = Color.FromArgb(24, 24, 24);
-                        dgvEntries.GridColor = Color.FromArgb(64, 64, 64);
-                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = Color.Black; } catch { }
-                    }
-                    try { if (btnLogin != null) btnLogin.ForeColor = Color.Black; } catch { }
-                    try { if (btnRegister != null) btnRegister.ForeColor = Color.Black; } catch { }
-                    try { if (btnResearch != null) btnResearch.ForeColor = Color.Black; } catch { }
+            Graph graph = new Graph();
+            graph.ShowDialog();
+        }
 
-                    foreach (Control c in this.Controls)
-                    {
-                        try
-                        {
-                            if (c is Button b)
-                            {
-                                b.BackColor = Color.FromArgb(96, 96, 96);
-                                b.ForeColor = Color.Black;
-                            }
-                            else if (c is TextBox tb)
-                            {
-                                tb.BackColor = Color.FromArgb(96, 96, 96);
-                                tb.ForeColor = Color.Black;
-                            }
-                        }
-                        catch { }
-                    }
-                }
-                else
-                {
-                    this.BackColor = SystemColors.Control;
-                    this.ForeColor = SystemColors.ControlText;
-                    if (dgvEntries != null)
-                    {
-                        dgvEntries.BackgroundColor = SystemColors.Window;
-                        dgvEntries.GridColor = SystemColors.ControlDark;
-                        try { dgvEntries.RowsDefaultCellStyle.ForeColor = SystemColors.ControlText; } catch { }
-                    }
-                    try { if (btnLogin != null) btnLogin.ForeColor = SystemColors.ControlText; } catch { }
-                    try { if (btnRegister != null) btnRegister.ForeColor = SystemColors.ControlText; } catch { }
-                    try { if (btnResearch != null) btnResearch.ForeColor = SystemColors.ControlText; } catch { }
+        private void ApplyFilter()
+        {
+            IEnumerable<Transaction> list = _transactions;
 
-                    foreach (Control c in this.Controls)
-                    {
-                        try
-                        {
-                            if (c is Button b)
-                            {
-                                b.BackColor = SystemColors.Control;
-                                b.ForeColor = SystemColors.ControlText;
-                            }
-                            else if (c is TextBox tb)
-                            {
-                                tb.BackColor = SystemColors.Window;
-                                tb.ForeColor = SystemColors.ControlText;
-                            }
-                        }
-                        catch { }
-                    }
-                }
-            }
-            catch { }
+            // 필터
+            if (cbFilter.SelectedItem?.ToString() == "수입만")
+                list = list.Where(t => t.Amount > 0);
+            else if (cbFilter.SelectedItem?.ToString() == "지출만")
+                list = list.Where(t => t.Amount < 0);
+            else if (cbFilter.SelectedItem?.ToString() == "전체")
+                list = list;
+
+            // 정렬
+            if (cbOrder.SelectedItem?.ToString() == "최신순")
+                list = list.OrderByDescending(t => t.Date);
+            else if (cbOrder.SelectedItem?.ToString() == "과거순")
+                list = list.OrderBy(t => t.Date);
+
+            dgvEntries.DataSource = new BindingList<Transaction>(list.ToList());
+        }
+
+        private void cbSort_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
         }
 
         [DataContract]
