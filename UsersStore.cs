@@ -72,5 +72,17 @@ namespace SmartAccountBook
             var list = LoadAll();
             return list.Exists(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) && (u.Password ?? "") == password);
         }
+        public static string GetPassword(string username)
+        {
+            username = (username ?? "").Trim();
+
+            var list = LoadAll();
+
+            var user = list.Find(u =>
+                u.Username.Equals(username,
+                StringComparison.OrdinalIgnoreCase));
+
+            return user?.Password;
+        }
     }
 }

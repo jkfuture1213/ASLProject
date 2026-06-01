@@ -671,5 +671,13 @@ namespace SmartAccountBook
             [DataMember]
             public decimal Amount { get; set; }
         }
+
+        private void linkFindPassword_LinkClicked(
+     object sender,
+     LinkLabelLinkClickedEventArgs e)
+        {
+            FindPasswordForm frm = new FindPasswordForm();
+            frm.ShowDialog();
+        }
     }
 }
