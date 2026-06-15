@@ -110,69 +110,7 @@ namespace SmartAccountBook
             try { panelMiddle.BackColor = panelBack; } catch { }
             try { panelRight.BackColor = panelBack; } catch { }
 
-            // Set colors for controls within panels
-            void SetControlColors(Control parent)
-            {
-                foreach (Control c in parent.Controls)
-                {
-                    try
-                    {
-                        // Text-based controls
-                        if (c is Label)
-                        {
-                            c.BackColor = Color.Transparent;
-                            c.ForeColor = fore;
-                        }
-                        else if (c is Button btn)
-                        {
-                            btn.BackColor = enabled ? panelBack : SystemColors.Control;
-                            btn.ForeColor = fore;
-                            try { btn.FlatStyle = FlatStyle.Flat; } catch { }
-                            try { btn.FlatAppearance.BorderColor = enabled ? Color.FromArgb(70, 70, 73) : SystemColors.ControlDark; } catch { }
-                        }
-                        else if (c is ComboBox cb)
-                        {
-                            cb.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
-                            cb.ForeColor = fore;
-                        }
-                        else if (c is CheckBox || c is RadioButton)
-                        {
-                            c.BackColor = Color.Transparent;
-                            c.ForeColor = fore;
-                        }
-                        else if (c is TextBox || c is NumericUpDown)
-                        {
-                            c.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
-                            c.ForeColor = fore;
-                        }
-                        else if (c is DateTimePicker)
-                        {
-                            c.ForeColor = fore;
-                        }
-                        else if (c is DataGridView dgv)
-                        {
-                            dgv.EnableHeadersVisualStyles = false;
-                            dgv.BackgroundColor = panelBack;
-                            dgv.DefaultCellStyle.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
-                            dgv.DefaultCellStyle.ForeColor = fore;
-                            dgv.ColumnHeadersDefaultCellStyle.BackColor = enabled ? Color.FromArgb(45, 45, 48) : SystemColors.Control;
-                            dgv.ColumnHeadersDefaultCellStyle.ForeColor = fore;
-                            dgv.RowHeadersDefaultCellStyle.BackColor = dgv.ColumnHeadersDefaultCellStyle.BackColor;
-                            dgv.RowHeadersDefaultCellStyle.ForeColor = fore;
-                        }
-                        else
-                        {
-                            c.BackColor = Color.Transparent;
-                            c.ForeColor = fore;
-                        }
-                    }
-                    catch { }
-
-                    if (c.HasChildren) SetControlColors(c);
-                }
-            }
-
-            try { SetControlColors(this); } catch { }
+            try { SetControlColors(this, enabled, panelBack, fore); } catch { }
 
             // Special cases
             try { txtAnalysis.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window; txtAnalysis.ForeColor = fore; } catch { }
@@ -180,6 +118,115 @@ namespace SmartAccountBook
 
             // Update toggle button text
             try { btnToggleDarkMode.Text = enabled ? "라이트 모드" : "다크 모드"; } catch { }
+        }
+
+        private void SetControlColors(Control parent, bool enabled, Color panelBack, Color fore)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                try
+                {
+                    if (c is Label)
+                    {
+                        c.BackColor = Color.Transparent;
+                        c.ForeColor = fore;
+                    }
+                    else if (c is Button btn)
+                    {
+                        btn.BackColor = enabled ? panelBack : SystemColors.Control;
+                        btn.ForeColor = fore;
+                        try { btn.FlatStyle = FlatStyle.Flat; } catch { }
+                        try { btn.FlatAppearance.BorderColor = enabled ? Color.FromArgb(70, 70, 73) : SystemColors.ControlDark; } catch { }
+                    }
+                    else if (c is ComboBox cb)
+                    {
+                        cb.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
+                        cb.ForeColor = fore;
+                    }
+                    else if (c is CheckBox || c is RadioButton)
+                    {
+                        c.BackColor = Color.Transparent;
+                        c.ForeColor = fore;
+                    }
+                    else if (c is TextBox || c is NumericUpDown)
+                    {
+                        c.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
+                        c.ForeColor = fore;
+                    }
+                    else if (c is DateTimePicker)
+                    {
+                        c.ForeColor = fore;
+                    }
+                    else if (c is DataGridView dgv)
+                    {
+                        dgv.EnableHeadersVisualStyles = false;
+                        dgv.BackgroundColor = panelBack;
+                        dgv.DefaultCellStyle.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
+                        dgv.DefaultCellStyle.ForeColor = fore;
+                        dgv.ColumnHeadersDefaultCellStyle.BackColor = enabled ? Color.FromArgb(45, 45, 48) : SystemColors.Control;
+                        dgv.ColumnHeadersDefaultCellStyle.ForeColor = fore;
+                        dgv.RowHeadersDefaultCellStyle.BackColor = dgv.ColumnHeadersDefaultCellStyle.BackColor;
+                        dgv.RowHeadersDefaultCellStyle.ForeColor = fore;
+                    }
+                    else
+                    {
+                        c.BackColor = Color.Transparent;
+                        c.ForeColor = fore;
+                    }
+                }
+                catch { }
+
+                if (c.HasChildren) SetControlColors(c, enabled, panelBack, fore);
+            }
+        }
+
+        private void btnAddCategory_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string input = PromptInput("새 카테고리 이름을 입력하세요:", "카테고리 추가");
+                if (string.IsNullOrWhiteSpace(input)) return;
+                input = input.Trim();
+                if (!cbCategory.Items.Contains(input))
+                {
+                    cbCategory.Items.Add(input);
+                }
+                cbCategory.SelectedItem = input;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("카테고리 추가 중 오류가 발생했습니다: " + ex.Message);
+            }
+        }
+
+        private string PromptInput(string prompt, string title)
+        {
+            using (var form = new Form())
+            {
+                form.Text = title;
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.MinimizeBox = false;
+                form.MaximizeBox = false;
+                form.ShowInTaskbar = false;
+                form.ClientSize = new Size(360, 100);
+
+                var lbl = new Label() { Left = 10, Top = 10, Width = 340, Text = prompt };
+                var txt = new TextBox() { Left = 10, Top = 35, Width = 340 };
+                var btnOk = new Button() { Text = "확인", Left = 200, Width = 70, Top = 64, DialogResult = DialogResult.OK };
+                var btnCancel = new Button() { Text = "취소", Left = 280, Width = 70, Top = 64, DialogResult = DialogResult.Cancel };
+
+                form.Controls.Add(lbl);
+                form.Controls.Add(txt);
+                form.Controls.Add(btnOk);
+                form.Controls.Add(btnCancel);
+                form.AcceptButton = btnOk;
+                form.CancelButton = btnCancel;
+
+                var dr = form.ShowDialog(this);
+                if (dr == DialogResult.OK) return txt.Text;
+                return null;
+            }
         }
 
         private void UpdateUiForLoginState(bool loggedIn)

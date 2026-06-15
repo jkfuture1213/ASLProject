@@ -41,6 +41,7 @@
         private System.Windows.Forms.Label lblAnalysisTitle;
         private System.Windows.Forms.Button btnToggleDarkMode;
         private System.Windows.Forms.Button btnLogout;
+        private System.Windows.Forms.Button btnAddCategory;
 
         private void InitializeComponent()
         {
@@ -63,6 +64,7 @@
             this.lblAmount = new System.Windows.Forms.Label();
             this.btnResearch = new System.Windows.Forms.Button();
             this.cbCategory = new System.Windows.Forms.ComboBox();
+            this.btnAddCategory = new System.Windows.Forms.Button();
             this.panelRight = new System.Windows.Forms.Panel();
             this.lblAnalysisTitle = new System.Windows.Forms.Label();
             this.txtAnalysis = new System.Windows.Forms.TextBox();
@@ -92,6 +94,7 @@
             this.panelMiddle.Controls.Add(this.lblAmount);
             this.panelMiddle.Controls.Add(this.btnResearch);
             this.panelMiddle.Controls.Add(this.cbCategory);
+            this.panelMiddle.Controls.Add(this.btnAddCategory);
             this.panelMiddle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMiddle.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.panelMiddle.Location = new System.Drawing.Point(0, 0);
@@ -170,7 +173,7 @@
             this.cbType.Items.AddRange(new object[] {
             "수입",
             "지출"});
-            this.cbType.Location = new System.Drawing.Point(227, 6);
+            this.cbType.Location = new System.Drawing.Point(223, 6);
             this.cbType.Margin = new System.Windows.Forms.Padding(2);
             this.cbType.Name = "cbType";
             this.cbType.Size = new System.Drawing.Size(52, 23);
@@ -180,7 +183,7 @@
             // txtDescription
             // 
             this.txtDescription.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.txtDescription.Location = new System.Drawing.Point(50, 35);
+            this.txtDescription.Location = new System.Drawing.Point(45, 36);
             this.txtDescription.Margin = new System.Windows.Forms.Padding(2);
             this.txtDescription.Name = "txtDescription";
             this.txtDescription.Size = new System.Drawing.Size(129, 23);
@@ -189,7 +192,7 @@
             // nudAmount
             // 
             this.nudAmount.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.nudAmount.Location = new System.Drawing.Point(227, 34);
+            this.nudAmount.Location = new System.Drawing.Point(223, 37);
             this.nudAmount.Margin = new System.Windows.Forms.Padding(2);
             this.nudAmount.Maximum = new decimal(new int[] {
             1000000000,
@@ -204,7 +207,7 @@
             // btnAdd
             // 
             this.btnAdd.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnAdd.Location = new System.Drawing.Point(311, 35);
+            this.btnAdd.Location = new System.Drawing.Point(311, 36);
             this.btnAdd.Margin = new System.Windows.Forms.Padding(2);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(48, 23);
@@ -216,7 +219,7 @@
             // btnDelete
             // 
             this.btnDelete.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnDelete.Location = new System.Drawing.Point(363, 35);
+            this.btnDelete.Location = new System.Drawing.Point(363, 37);
             this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(45, 23);
@@ -274,7 +277,7 @@
             // 
             this.lblDescription.AutoSize = true;
             this.lblDescription.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.lblDescription.Location = new System.Drawing.Point(8, 35);
+            this.lblDescription.Location = new System.Drawing.Point(8, 39);
             this.lblDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblDescription.Name = "lblDescription";
             this.lblDescription.Size = new System.Drawing.Size(34, 15);
@@ -285,7 +288,7 @@
             // 
             this.lblAmount.AutoSize = true;
             this.lblAmount.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.lblAmount.Location = new System.Drawing.Point(185, 37);
+            this.lblAmount.Location = new System.Drawing.Point(185, 39);
             this.lblAmount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblAmount.Name = "lblAmount";
             this.lblAmount.Size = new System.Drawing.Size(34, 15);
@@ -317,11 +320,23 @@
             "의료",
             "문화",
             "여행"});
-            this.cbCategory.Location = new System.Drawing.Point(356, 8);
+            this.cbCategory.Location = new System.Drawing.Point(349, 6);
             this.cbCategory.Margin = new System.Windows.Forms.Padding(2);
             this.cbCategory.Name = "cbCategory";
             this.cbCategory.Size = new System.Drawing.Size(78, 23);
             this.cbCategory.TabIndex = 15;
+            // 
+            // btnAddCategory
+            // 
+            this.btnAddCategory.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnAddCategory.Location = new System.Drawing.Point(433, 6);
+            this.btnAddCategory.Margin = new System.Windows.Forms.Padding(2);
+            this.btnAddCategory.Name = "btnAddCategory";
+            this.btnAddCategory.Size = new System.Drawing.Size(29, 23);
+            this.btnAddCategory.TabIndex = 19;
+            this.btnAddCategory.Text = "+";
+            this.btnAddCategory.UseVisualStyleBackColor = true;
+            this.btnAddCategory.Click += new System.EventHandler(this.btnAddCategory_Click);
             // 
             // panelRight
             // 
@@ -359,7 +374,7 @@
             this.txtAnalysis.Size = new System.Drawing.Size(184, 388);
             this.txtAnalysis.TabIndex = 1;
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -367,7 +382,7 @@
             this.Controls.Add(this.panelMiddle);
             this.Controls.Add(this.panelRight);
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "가계부";
             this.panelMiddle.ResumeLayout(false);
             this.panelMiddle.PerformLayout();
