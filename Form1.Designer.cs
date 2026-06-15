@@ -90,6 +90,7 @@
             this.panelMiddle.Controls.Add(this.btnResearch);
             this.panelMiddle.Controls.Add(this.cbCategory);
             this.panelMiddle.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelMiddle.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.panelMiddle.Location = new System.Drawing.Point(0, 0);
             this.panelMiddle.Margin = new System.Windows.Forms.Padding(2);
             this.panelMiddle.Name = "panelMiddle";
@@ -98,20 +99,22 @@
             // 
             // btnGraph
             // 
+            this.btnGraph.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnGraph.Location = new System.Drawing.Point(567, 402);
             this.btnGraph.Margin = new System.Windows.Forms.Padding(2);
             this.btnGraph.Name = "btnGraph";
-            this.btnGraph.Size = new System.Drawing.Size(121, 22);
+            this.btnGraph.Size = new System.Drawing.Size(121, 25);
             this.btnGraph.TabIndex = 16;
             this.btnGraph.Text = "분석 그래프 보기";
             this.btnGraph.UseVisualStyleBackColor = true;
             // 
             // btnToggleDarkMode
             // 
+            this.btnToggleDarkMode.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnToggleDarkMode.Location = new System.Drawing.Point(609, 7);
             this.btnToggleDarkMode.Margin = new System.Windows.Forms.Padding(2);
             this.btnToggleDarkMode.Name = "btnToggleDarkMode";
-            this.btnToggleDarkMode.Size = new System.Drawing.Size(82, 22);
+            this.btnToggleDarkMode.Size = new System.Drawing.Size(82, 30);
             this.btnToggleDarkMode.TabIndex = 17;
             this.btnToggleDarkMode.Text = "다크 모드";
             this.btnToggleDarkMode.UseVisualStyleBackColor = true;
@@ -137,15 +140,17 @@
             // 
             // dtpDate
             // 
+            this.dtpDate.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.dtpDate.Location = new System.Drawing.Point(45, 5);
             this.dtpDate.Margin = new System.Windows.Forms.Padding(2);
             this.dtpDate.Name = "dtpDate";
-            this.dtpDate.Size = new System.Drawing.Size(129, 21);
+            this.dtpDate.Size = new System.Drawing.Size(136, 23);
             this.dtpDate.TabIndex = 1;
             // 
             // cbType
             // 
             this.cbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbType.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.cbType.FormattingEnabled = true;
             this.cbType.Items.AddRange(new object[] {
             "수입",
@@ -153,20 +158,22 @@
             this.cbType.Location = new System.Drawing.Point(227, 6);
             this.cbType.Margin = new System.Windows.Forms.Padding(2);
             this.cbType.Name = "cbType";
-            this.cbType.Size = new System.Drawing.Size(52, 20);
+            this.cbType.Size = new System.Drawing.Size(52, 23);
             this.cbType.TabIndex = 2;
             this.cbType.SelectedIndexChanged += new System.EventHandler(this.cbType_SelectedIndexChanged);
             // 
             // txtDescription
             // 
+            this.txtDescription.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtDescription.Location = new System.Drawing.Point(50, 35);
             this.txtDescription.Margin = new System.Windows.Forms.Padding(2);
             this.txtDescription.Name = "txtDescription";
-            this.txtDescription.Size = new System.Drawing.Size(129, 21);
+            this.txtDescription.Size = new System.Drawing.Size(129, 23);
             this.txtDescription.TabIndex = 4;
             // 
             // nudAmount
             // 
+            this.nudAmount.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.nudAmount.Location = new System.Drawing.Point(227, 34);
             this.nudAmount.Margin = new System.Windows.Forms.Padding(2);
             this.nudAmount.Maximum = new decimal(new int[] {
@@ -175,16 +182,17 @@
             0,
             0});
             this.nudAmount.Name = "nudAmount";
-            this.nudAmount.Size = new System.Drawing.Size(64, 21);
+            this.nudAmount.Size = new System.Drawing.Size(64, 23);
             this.nudAmount.TabIndex = 5;
             this.nudAmount.ThousandsSeparator = true;
             // 
             // btnAdd
             // 
+            this.btnAdd.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnAdd.Location = new System.Drawing.Point(311, 35);
             this.btnAdd.Margin = new System.Windows.Forms.Padding(2);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(48, 20);
+            this.btnAdd.Size = new System.Drawing.Size(48, 23);
             this.btnAdd.TabIndex = 6;
             this.btnAdd.Text = "추가";
             this.btnAdd.UseVisualStyleBackColor = true;
@@ -192,10 +200,11 @@
             // 
             // btnDelete
             // 
+            this.btnDelete.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnDelete.Location = new System.Drawing.Point(363, 35);
             this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(45, 20);
+            this.btnDelete.Size = new System.Drawing.Size(45, 23);
             this.btnDelete.TabIndex = 7;
             this.btnDelete.Text = "삭제";
             this.btnDelete.UseVisualStyleBackColor = true;
@@ -216,59 +225,65 @@
             // lblDate
             // 
             this.lblDate.AutoSize = true;
+            this.lblDate.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblDate.Location = new System.Drawing.Point(8, 9);
             this.lblDate.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblDate.Name = "lblDate";
-            this.lblDate.Size = new System.Drawing.Size(33, 12);
+            this.lblDate.Size = new System.Drawing.Size(34, 15);
             this.lblDate.TabIndex = 9;
             this.lblDate.Text = "날짜:";
             // 
             // lblType
             // 
             this.lblType.AutoSize = true;
+            this.lblType.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblType.Location = new System.Drawing.Point(185, 9);
             this.lblType.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(33, 12);
+            this.lblType.Size = new System.Drawing.Size(34, 15);
             this.lblType.TabIndex = 10;
             this.lblType.Text = "구분:";
             // 
             // lblCategory
             // 
             this.lblCategory.AutoSize = true;
+            this.lblCategory.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblCategory.Location = new System.Drawing.Point(287, 11);
             this.lblCategory.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblCategory.Name = "lblCategory";
-            this.lblCategory.Size = new System.Drawing.Size(57, 12);
+            this.lblCategory.Size = new System.Drawing.Size(58, 15);
             this.lblCategory.TabIndex = 11;
             this.lblCategory.Text = "카테고리:";
             // 
             // lblDescription
             // 
             this.lblDescription.AutoSize = true;
+            this.lblDescription.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblDescription.Location = new System.Drawing.Point(8, 35);
             this.lblDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblDescription.Name = "lblDescription";
-            this.lblDescription.Size = new System.Drawing.Size(33, 12);
+            this.lblDescription.Size = new System.Drawing.Size(34, 15);
             this.lblDescription.TabIndex = 12;
             this.lblDescription.Text = "메모:";
             // 
             // lblAmount
             // 
             this.lblAmount.AutoSize = true;
+            this.lblAmount.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblAmount.Location = new System.Drawing.Point(185, 37);
             this.lblAmount.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblAmount.Name = "lblAmount";
-            this.lblAmount.Size = new System.Drawing.Size(33, 12);
+            this.lblAmount.Size = new System.Drawing.Size(34, 15);
             this.lblAmount.TabIndex = 13;
             this.lblAmount.Text = "금액:";
             // 
             // btnResearch
             // 
+            this.btnResearch.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnResearch.Location = new System.Drawing.Point(457, 402);
             this.btnResearch.Margin = new System.Windows.Forms.Padding(2);
             this.btnResearch.Name = "btnResearch";
-            this.btnResearch.Size = new System.Drawing.Size(106, 22);
+            this.btnResearch.Size = new System.Drawing.Size(106, 25);
             this.btnResearch.TabIndex = 14;
             this.btnResearch.Text = "지출 내역 분석";
             this.btnResearch.UseVisualStyleBackColor = true;
@@ -277,6 +292,7 @@
             // cbCategory
             // 
             this.cbCategory.Enabled = false;
+            this.cbCategory.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.cbCategory.FormattingEnabled = true;
             this.cbCategory.Items.AddRange(new object[] {
             "월급",
@@ -289,7 +305,7 @@
             this.cbCategory.Location = new System.Drawing.Point(356, 8);
             this.cbCategory.Margin = new System.Windows.Forms.Padding(2);
             this.cbCategory.Name = "cbCategory";
-            this.cbCategory.Size = new System.Drawing.Size(78, 20);
+            this.cbCategory.Size = new System.Drawing.Size(78, 23);
             this.cbCategory.TabIndex = 15;
             // 
             // panelRight

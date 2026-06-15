@@ -64,6 +64,16 @@ namespace SmartAccountBook
             dgvEntries.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             dgvEntries.DataSource = _transactions;
 
+            // set DataGridView fonts to 맑은 고딕 for content and headers
+            try
+            {
+                dgvEntries.EnableHeadersVisualStyles = false;
+                dgvEntries.DefaultCellStyle.Font = new Font("맑은 고딕", 9F);
+                dgvEntries.ColumnHeadersDefaultCellStyle.Font = new Font("맑은 고딕", 9F, FontStyle.Bold);
+                dgvEntries.RowHeadersDefaultCellStyle.Font = new Font("맑은 고딕", 9F);
+            }
+            catch { }
+
             _transactions.ListChanged += (s, e) => UpdateTotal();
 
             try
