@@ -16,7 +16,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace SmartAccountBook
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private BindingList<Transaction> _transactions = new BindingList<Transaction>();
         private DateTime _lastAdd = DateTime.MinValue;
@@ -24,7 +24,7 @@ namespace SmartAccountBook
         private bool _darkMode = false;
 
 
-        public Form1(string userID)
+        public MainForm(string userID)
         {
             InitializeComponent();
             // graph button handler
@@ -394,7 +394,7 @@ namespace SmartAccountBook
         }
         private void btnGraph_Click(object sender, EventArgs e)
         {
-            // 지출 항목 전체를 카테고리별 합계로 그룹화하여 Graph 폼에 전달
+            // 원본 거래 목록을 GraphForm에 전달하면 폼에서 연/월 필터를 적용하여 표시합니다.
             try
             {
                 var expenses = _transactions.Where(t => t.Amount < 0).ToList();
@@ -404,13 +404,7 @@ namespace SmartAccountBook
                     return;
                 }
 
-                var byCat = expenses
-                    .GroupBy(t => string.IsNullOrEmpty(t.Category) ? "미분류" : t.Category)
-                    .Select(g => Tuple.Create(g.Key, -g.Sum(t => t.Amount)))
-                    .OrderByDescending(x => x.Item2)
-                    .ToList();
-
-                using (var graph = new Graph(byCat, "카테고리별 지출 비율"))
+                using (var graph = new GraphForm(_transactions.ToList(), "카테고리별 지출 비율"))
                 {
                     graph.ShowDialog(this);
                 }

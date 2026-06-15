@@ -41,7 +41,7 @@ namespace SmartAccountBook
 
             if (success)
             {
-                Form1 main = new Form1(ID);
+                MainForm main = new MainForm(ID);
 
                 this.Hide();
                 main.ShowDialog();
