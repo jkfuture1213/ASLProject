@@ -39,10 +39,13 @@
         private System.Windows.Forms.Label lblAmount;
         private System.Windows.Forms.TextBox txtAnalysis;
         private System.Windows.Forms.Label lblAnalysisTitle;
+        private System.Windows.Forms.Button btnToggleDarkMode;
 
         private void InitializeComponent()
         {
             this.panelMiddle = new System.Windows.Forms.Panel();
+            this.btnGraph = new System.Windows.Forms.Button();
+            this.btnToggleDarkMode = new System.Windows.Forms.Button();
             this.dgvEntries = new System.Windows.Forms.DataGridView();
             this.dtpDate = new System.Windows.Forms.DateTimePicker();
             this.cbType = new System.Windows.Forms.ComboBox();
@@ -61,7 +64,6 @@
             this.panelRight = new System.Windows.Forms.Panel();
             this.lblAnalysisTitle = new System.Windows.Forms.Label();
             this.txtAnalysis = new System.Windows.Forms.TextBox();
-            this.btnGraph = new System.Windows.Forms.Button();
             this.panelMiddle.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvEntries)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudAmount)).BeginInit();
@@ -71,6 +73,7 @@
             // panelMiddle
             // 
             this.panelMiddle.Controls.Add(this.btnGraph);
+            this.panelMiddle.Controls.Add(this.btnToggleDarkMode);
             this.panelMiddle.Controls.Add(this.dgvEntries);
             this.panelMiddle.Controls.Add(this.dtpDate);
             this.panelMiddle.Controls.Add(this.cbType);
@@ -92,6 +95,27 @@
             this.panelMiddle.Name = "panelMiddle";
             this.panelMiddle.Size = new System.Drawing.Size(696, 427);
             this.panelMiddle.TabIndex = 1;
+            // 
+            // btnGraph
+            // 
+            this.btnGraph.Location = new System.Drawing.Point(535, 403);
+            this.btnGraph.Margin = new System.Windows.Forms.Padding(2);
+            this.btnGraph.Name = "btnGraph";
+            this.btnGraph.Size = new System.Drawing.Size(106, 22);
+            this.btnGraph.TabIndex = 16;
+            this.btnGraph.Text = "분석 그래프 보기";
+            this.btnGraph.UseVisualStyleBackColor = true;
+            // 
+            // btnToggleDarkMode
+            // 
+            this.btnToggleDarkMode.Location = new System.Drawing.Point(609, 7);
+            this.btnToggleDarkMode.Margin = new System.Windows.Forms.Padding(2);
+            this.btnToggleDarkMode.Name = "btnToggleDarkMode";
+            this.btnToggleDarkMode.Size = new System.Drawing.Size(82, 22);
+            this.btnToggleDarkMode.TabIndex = 17;
+            this.btnToggleDarkMode.Text = "다크 모드";
+            this.btnToggleDarkMode.UseVisualStyleBackColor = true;
+            this.btnToggleDarkMode.Click += new System.EventHandler(this.btnToggleDarkMode_Click);
             // 
             // dgvEntries
             // 
@@ -303,16 +327,6 @@
             this.txtAnalysis.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtAnalysis.Size = new System.Drawing.Size(184, 388);
             this.txtAnalysis.TabIndex = 1;
-            // 
-            // btnGraph
-            // 
-            this.btnGraph.Location = new System.Drawing.Point(535, 403);
-            this.btnGraph.Margin = new System.Windows.Forms.Padding(2);
-            this.btnGraph.Name = "btnGraph";
-            this.btnGraph.Size = new System.Drawing.Size(106, 22);
-            this.btnGraph.TabIndex = 16;
-            this.btnGraph.Text = "분석 그래프 보기";
-            this.btnGraph.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 

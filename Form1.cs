@@ -21,6 +21,7 @@ namespace SmartAccountBook
         private BindingList<Transaction> _transactions = new BindingList<Transaction>();
         private DateTime _lastAdd = DateTime.MinValue;
         private string _currentUser = null;
+        private bool _darkMode = false;
 
 
         public Form1(string userID)
@@ -71,8 +72,99 @@ namespace SmartAccountBook
             }
 
             UpdateTotal();
+            // 초기 다크 모드 적용 상태는 false
+            ApplyDarkMode(_darkMode);
             // 입력 관련 컨트롤은 로그인 전 비활성화
             //UpdateUiForLoginState(false);
+        }
+
+        private void btnToggleDarkMode_Click(object sender, EventArgs e)
+        {
+            _darkMode = !_darkMode;
+            ApplyDarkMode(_darkMode);
+        }
+
+        private void ApplyDarkMode(bool enabled)
+        {
+            Color back = enabled ? Color.FromArgb(30, 30, 30) : SystemColors.Control;
+            Color panelBack = enabled ? Color.FromArgb(45, 45, 48) : SystemColors.Control;
+            Color fore = enabled ? Color.White : SystemColors.ControlText;
+
+            // Form and main panels
+            this.BackColor = back;
+            try { panelMiddle.BackColor = panelBack; } catch { }
+            try { panelRight.BackColor = panelBack; } catch { }
+
+            // Set colors for controls within panels
+            void SetControlColors(Control parent)
+            {
+                foreach (Control c in parent.Controls)
+                {
+                    try
+                    {
+                        // Text-based controls
+                        if (c is Label)
+                        {
+                            c.BackColor = Color.Transparent;
+                            c.ForeColor = fore;
+                        }
+                        else if (c is Button btn)
+                        {
+                            btn.BackColor = enabled ? panelBack : SystemColors.Control;
+                            btn.ForeColor = fore;
+                            try { btn.FlatStyle = FlatStyle.Flat; } catch { }
+                            try { btn.FlatAppearance.BorderColor = enabled ? Color.FromArgb(70, 70, 73) : SystemColors.ControlDark; } catch { }
+                        }
+                        else if (c is ComboBox cb)
+                        {
+                            cb.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
+                            cb.ForeColor = fore;
+                        }
+                        else if (c is CheckBox || c is RadioButton)
+                        {
+                            c.BackColor = Color.Transparent;
+                            c.ForeColor = fore;
+                        }
+                        else if (c is TextBox || c is NumericUpDown)
+                        {
+                            c.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
+                            c.ForeColor = fore;
+                        }
+                        else if (c is DateTimePicker)
+                        {
+                            c.ForeColor = fore;
+                        }
+                        else if (c is DataGridView dgv)
+                        {
+                            dgv.EnableHeadersVisualStyles = false;
+                            dgv.BackgroundColor = panelBack;
+                            dgv.DefaultCellStyle.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window;
+                            dgv.DefaultCellStyle.ForeColor = fore;
+                            dgv.ColumnHeadersDefaultCellStyle.BackColor = enabled ? Color.FromArgb(45, 45, 48) : SystemColors.Control;
+                            dgv.ColumnHeadersDefaultCellStyle.ForeColor = fore;
+                            dgv.RowHeadersDefaultCellStyle.BackColor = dgv.ColumnHeadersDefaultCellStyle.BackColor;
+                            dgv.RowHeadersDefaultCellStyle.ForeColor = fore;
+                        }
+                        else
+                        {
+                            c.BackColor = Color.Transparent;
+                            c.ForeColor = fore;
+                        }
+                    }
+                    catch { }
+
+                    if (c.HasChildren) SetControlColors(c);
+                }
+            }
+
+            try { SetControlColors(this); } catch { }
+
+            // Special cases
+            try { txtAnalysis.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window; txtAnalysis.ForeColor = fore; } catch { }
+            try { txtDescription.BackColor = enabled ? Color.FromArgb(37, 37, 38) : SystemColors.Window; txtDescription.ForeColor = fore; } catch { }
+
+            // Update toggle button text
+            try { btnToggleDarkMode.Text = enabled ? "라이트 모드" : "다크 모드"; } catch { }
         }
 
         private void UpdateUiForLoginState(bool loggedIn)
