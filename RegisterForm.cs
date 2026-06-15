@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace SmartAccountBook
@@ -26,6 +27,17 @@ namespace SmartAccountBook
                 return;
             }
             this.DialogResult = DialogResult.OK;
+            if(!File.Exists($"users/{Username}_transactions.json"))
+            {
+                File.Create($"users/{Username}_transactions.json");
+                UsersStore.AddUser(Username, Password);
+                MessageBox.Show("회원가입 성공. 로그인 해주세요.", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+            else
+            {
+                MessageBox.Show("이미 존재하는 사용자입니다.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             this.Close();
         }
 
