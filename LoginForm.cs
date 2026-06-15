@@ -19,6 +19,19 @@ namespace SmartAccountBook
             textBoxPW.UseSystemPasswordChar = true;
         }
 
+        private void btnTogglePW_Click(object sender, EventArgs e)
+        {
+            // 토글: 현재 UseSystemPasswordChar 값을 반전
+            try
+            {
+                textBoxPW.UseSystemPasswordChar = !textBoxPW.UseSystemPasswordChar;
+            }
+            catch
+            {
+                // 안전하게 무시
+            }
+        }
+
         private void btnLogin_Click(object sender, EventArgs e)
         {
             string ID = textBoxID.Text;
@@ -44,6 +57,14 @@ namespace SmartAccountBook
         {
             RegisterForm register = new RegisterForm();
             register.ShowDialog();
+        }
+
+        private void btnRecoverPassword_Click(object sender, EventArgs e)
+        {
+            using (var form = new RecoverPasswordForm())
+            {
+                form.ShowDialog(this);
+            }
         }
     }
 }
