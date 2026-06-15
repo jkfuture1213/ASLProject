@@ -27,6 +27,8 @@ namespace SmartAccountBook
         public Form1(string userID)
         {
             InitializeComponent();
+            // graph button handler
+            try { btnGraph.Click += btnGraph_Click; } catch { }
             _currentUser = userID;
 
             // 디자이너에서는 아래 런타임 초기화를 실행하지 않음
@@ -55,7 +57,9 @@ namespace SmartAccountBook
                 }
             };
 
+            // add columns to grid (AutoGenerateColumns is false)
             dgvEntries.Columns.AddRange(new DataGridViewColumn[] { colDate, colType, colCategory, colDesc, colAmount });
+
             // Use per-column sizing modes (do not override with a global AutoSizeColumnsMode)
             dgvEntries.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             dgvEntries.DataSource = _transactions;
@@ -64,7 +68,8 @@ namespace SmartAccountBook
 
             try
             {
-                LoadTransactionsFromJson();
+                // load transactions specific to the logged-in user
+                LoadUserTransactions();
             }
             catch (Exception ex)
             {
@@ -381,6 +386,34 @@ namespace SmartAccountBook
         {
             decimal total = _transactions.Sum(t => t.Amount);
             lblTotal.Text = $"총합: {FormatWon(total)}";
+        }
+        private void btnGraph_Click(object sender, EventArgs e)
+        {
+            // 지출 항목 전체를 카테고리별 합계로 그룹화하여 Graph 폼에 전달
+            try
+            {
+                var expenses = _transactions.Where(t => t.Amount < 0).ToList();
+                if (expenses.Count == 0)
+                {
+                    MessageBox.Show("그래프로 표시할 지출 데이터가 없습니다.");
+                    return;
+                }
+
+                var byCat = expenses
+                    .GroupBy(t => string.IsNullOrEmpty(t.Category) ? "미분류" : t.Category)
+                    .Select(g => Tuple.Create(g.Key, -g.Sum(t => t.Amount)))
+                    .OrderByDescending(x => x.Item2)
+                    .ToList();
+
+                using (var graph = new Graph(byCat, "카테고리별 지출 비율"))
+                {
+                    graph.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("그래프 표시 오류: " + ex.Message);
+            }
         }
 
         private string JsonFilePath => Path.Combine(Application.StartupPath, $"{_currentUser}_transactions.json");

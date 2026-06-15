@@ -98,10 +98,10 @@
             // 
             // btnGraph
             // 
-            this.btnGraph.Location = new System.Drawing.Point(535, 403);
+            this.btnGraph.Location = new System.Drawing.Point(567, 402);
             this.btnGraph.Margin = new System.Windows.Forms.Padding(2);
             this.btnGraph.Name = "btnGraph";
-            this.btnGraph.Size = new System.Drawing.Size(106, 22);
+            this.btnGraph.Size = new System.Drawing.Size(121, 22);
             this.btnGraph.TabIndex = 16;
             this.btnGraph.Text = "분석 그래프 보기";
             this.btnGraph.UseVisualStyleBackColor = true;
@@ -137,7 +137,7 @@
             // 
             // dtpDate
             // 
-            this.dtpDate.Location = new System.Drawing.Point(43, 7);
+            this.dtpDate.Location = new System.Drawing.Point(45, 5);
             this.dtpDate.Margin = new System.Windows.Forms.Padding(2);
             this.dtpDate.Name = "dtpDate";
             this.dtpDate.Size = new System.Drawing.Size(129, 21);
@@ -150,7 +150,7 @@
             this.cbType.Items.AddRange(new object[] {
             "수입",
             "지출"});
-            this.cbType.Location = new System.Drawing.Point(227, 10);
+            this.cbType.Location = new System.Drawing.Point(227, 6);
             this.cbType.Margin = new System.Windows.Forms.Padding(2);
             this.cbType.Name = "cbType";
             this.cbType.Size = new System.Drawing.Size(52, 20);
@@ -226,7 +226,7 @@
             // lblType
             // 
             this.lblType.AutoSize = true;
-            this.lblType.Location = new System.Drawing.Point(185, 11);
+            this.lblType.Location = new System.Drawing.Point(185, 9);
             this.lblType.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(33, 12);
@@ -265,7 +265,7 @@
             // 
             // btnResearch
             // 
-            this.btnResearch.Location = new System.Drawing.Point(425, 403);
+            this.btnResearch.Location = new System.Drawing.Point(457, 402);
             this.btnResearch.Margin = new System.Windows.Forms.Padding(2);
             this.btnResearch.Name = "btnResearch";
             this.btnResearch.Size = new System.Drawing.Size(106, 22);
