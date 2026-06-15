@@ -45,7 +45,17 @@ namespace SmartAccountBook
 
                 this.Hide();
                 main.ShowDialog();
-                this.Close();
+                // 로그아웃 시 다시 로그인 폼을 보여주기 위해 Close 대신 Show로 변경
+                this.Show();
+                // 돌아왔을 때 입력 필드 초기화
+                try
+                {
+                    textBoxID.Clear();
+                    textBoxPW.Clear();
+                    textBoxID.Focus();
+                    textBoxPW.UseSystemPasswordChar = true;
+                }
+                catch { }
             }
             else
             {

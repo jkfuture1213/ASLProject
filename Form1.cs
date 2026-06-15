@@ -261,37 +261,18 @@ namespace SmartAccountBook
 
         private void btnResearch_Click(object sender, EventArgs e)
         {
-            // 지출(음수) 항목만 분석하여 카테고리별 합계를 표시
-            var expenses = _transactions.Where(t => t.Amount < 0).ToList();
-            var byCat = expenses
-                .GroupBy(t => string.IsNullOrEmpty(t.Category) ? "미분류" : t.Category)
-                .Select(g => Tuple.Create(g.Key, -g.Sum(t => t.Amount)))
-                .OrderByDescending(x => x.Item2)
-                .ToList();
-
-            var sb = new StringBuilder();
-            decimal grand = 0;
-            foreach (var c in byCat)
+            try
             {
-                grand += c.Item2;
-                sb.AppendLine($"{c.Item1}: {FormatWon(c.Item2)}");
+                // Use rule-based analysis engine
+                var engine = new AnalysisEngine();
+                var result = engine.Analyze(_transactions.ToList(), DateTime.Now);
+                var report = ReportGenerator.GenerateReport(result);
+                txtAnalysis.Text = string.Join(Environment.NewLine + Environment.NewLine, report);
             }
-            sb.AppendLine("---------------------------");
-            sb.AppendLine($"총지출: {FormatWon(grand)}");
-
-            // 전체 잔액(남은 돈)을 계산하고 추천을 표시
-            decimal balance = _transactions.Sum(t => t.Amount);
-            sb.AppendLine($"남은돈: {FormatWon(balance)}");
-            sb.AppendLine();
-            var recs = RecommendUsage(balance, byCat);
-            sb.AppendLine("추천 사용처:");
-            foreach (var r in recs)
+            catch (Exception ex)
             {
-                sb.AppendLine(r);
+                txtAnalysis.Text = "분석 중 오류가 발생했습니다: " + ex.Message;
             }
-
-            // 결과를 텍스트박스에 표시 (자동 줄바꿈 적용됨)
-            txtAnalysis.Text = sb.ToString();
         }
 
         private void cbType_SelectedIndexChanged(object sender, EventArgs e)
@@ -396,6 +377,20 @@ namespace SmartAccountBook
         {
             decimal total = _transactions.Sum(t => t.Amount);
             lblTotal.Text = $"총합: {FormatWon(total)}";
+        }
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            // Form1은 LoginForm에서 ShowDialog로 열리므로 단순히 Close하면
+            // LoginForm의 ShowDialog 호출이 반환되어 로그인 폼이 다시 표시됩니다.
+            try
+            {
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("로그아웃 중 오류가 발생했습니다: " + ex.Message);
+            }
         }
         private void btnGraph_Click(object sender, EventArgs e)
         {
@@ -518,21 +513,6 @@ namespace SmartAccountBook
             return rec;
         }
 
-        [DataContract]
-        private class Transaction
-        {
-            [DataMember]
-            public int Id { get; set; }
-            [DataMember]
-            public DateTime Date { get; set; }
-            [DataMember]
-            public string Type { get; set; }
-            [DataMember]
-            public string Category { get; set; }
-            [DataMember]
-            public string Description { get; set; }
-            [DataMember]
-            public decimal Amount { get; set; }
-        }
+
     }
 }

@@ -40,12 +40,14 @@
         private System.Windows.Forms.TextBox txtAnalysis;
         private System.Windows.Forms.Label lblAnalysisTitle;
         private System.Windows.Forms.Button btnToggleDarkMode;
+        private System.Windows.Forms.Button btnLogout;
 
         private void InitializeComponent()
         {
             this.panelMiddle = new System.Windows.Forms.Panel();
             this.btnGraph = new System.Windows.Forms.Button();
             this.btnToggleDarkMode = new System.Windows.Forms.Button();
+            this.btnLogout = new System.Windows.Forms.Button();
             this.dgvEntries = new System.Windows.Forms.DataGridView();
             this.dtpDate = new System.Windows.Forms.DateTimePicker();
             this.cbType = new System.Windows.Forms.ComboBox();
@@ -74,6 +76,7 @@
             // 
             this.panelMiddle.Controls.Add(this.btnGraph);
             this.panelMiddle.Controls.Add(this.btnToggleDarkMode);
+            this.panelMiddle.Controls.Add(this.btnLogout);
             this.panelMiddle.Controls.Add(this.dgvEntries);
             this.panelMiddle.Controls.Add(this.dtpDate);
             this.panelMiddle.Controls.Add(this.cbType);
@@ -119,6 +122,18 @@
             this.btnToggleDarkMode.Text = "다크 모드";
             this.btnToggleDarkMode.UseVisualStyleBackColor = true;
             this.btnToggleDarkMode.Click += new System.EventHandler(this.btnToggleDarkMode_Click);
+            // 
+            // btnLogout
+            // 
+            this.btnLogout.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnLogout.Location = new System.Drawing.Point(520, 7);
+            this.btnLogout.Margin = new System.Windows.Forms.Padding(2);
+            this.btnLogout.Name = "btnLogout";
+            this.btnLogout.Size = new System.Drawing.Size(82, 30);
+            this.btnLogout.TabIndex = 18;
+            this.btnLogout.Text = "로그아웃";
+            this.btnLogout.UseVisualStyleBackColor = true;
+            this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
             // 
             // dgvEntries
             // 
