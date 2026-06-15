@@ -72,5 +72,10 @@ namespace SmartAccountBook
             var list = LoadAll();
             return list.Exists(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) && (u.Password ?? "") == password);
         }
+
+        internal static bool Validate(string currentUser, object text)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
