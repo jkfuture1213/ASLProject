@@ -153,7 +153,7 @@
             this.Controls.Add(this.textBoxPW);
             this.Controls.Add(this.textBoxID);
             this.Name = "LoginForm";
-            this.Text = "LoginForm";
+            this.Text = "Login";
             this.ResumeLayout(false);
             this.PerformLayout();
 
