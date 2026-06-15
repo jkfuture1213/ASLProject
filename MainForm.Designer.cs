@@ -365,6 +365,7 @@
             this.txtAnalysis.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAnalysis.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtAnalysis.Location = new System.Drawing.Point(10, 25);
             this.txtAnalysis.Margin = new System.Windows.Forms.Padding(2);
             this.txtAnalysis.Multiline = true;

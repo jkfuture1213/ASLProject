@@ -114,7 +114,7 @@ namespace SmartAccountBook
             decimal total = _data.Sum(x => x.Item2);
             if (total <= 0)
             {
-                using (var f = new Font(FontFamily.GenericSansSerif, 12))
+                using (var f = new Font("맑은 고딕", 12))
                 using (var b = new SolidBrush(Color.Black))
                 {
                     g.DrawString("유효한 지출 데이터가 없습니다.", f, b, 10, 10);

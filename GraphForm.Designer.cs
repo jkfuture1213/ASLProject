@@ -64,41 +64,46 @@
             // labelYear
             // 
             this.labelYear.AutoSize = true;
+            this.labelYear.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelYear.Location = new System.Drawing.Point(12, 12);
             this.labelYear.Name = "labelYear";
-            this.labelYear.Size = new System.Drawing.Size(29, 12);
+            this.labelYear.Size = new System.Drawing.Size(34, 15);
             this.labelYear.TabIndex = 0;
             this.labelYear.Text = "연도:";
             // 
             // cbYear
             // 
             this.cbYear.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbYear.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.cbYear.FormattingEnabled = true;
             this.cbYear.Location = new System.Drawing.Point(48, 8);
             this.cbYear.Name = "cbYear";
-            this.cbYear.Size = new System.Drawing.Size(100, 20);
+            this.cbYear.Size = new System.Drawing.Size(100, 23);
             this.cbYear.TabIndex = 1;
             // 
             // labelMonth
             // 
             this.labelMonth.AutoSize = true;
+            this.labelMonth.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelMonth.Location = new System.Drawing.Point(160, 12);
             this.labelMonth.Name = "labelMonth";
-            this.labelMonth.Size = new System.Drawing.Size(21, 12);
+            this.labelMonth.Size = new System.Drawing.Size(22, 15);
             this.labelMonth.TabIndex = 2;
             this.labelMonth.Text = "월:";
             // 
             // cbMonth
             // 
             this.cbMonth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbMonth.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.cbMonth.FormattingEnabled = true;
             this.cbMonth.Location = new System.Drawing.Point(188, 8);
             this.cbMonth.Name = "cbMonth";
-            this.cbMonth.Size = new System.Drawing.Size(80, 20);
+            this.cbMonth.Size = new System.Drawing.Size(80, 23);
             this.cbMonth.TabIndex = 3;
             // 
             // btnApply
             // 
+            this.btnApply.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnApply.Location = new System.Drawing.Point(280, 7);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(64, 24);
@@ -108,8 +113,8 @@
             // 
             // pbGraph
             // 
-            this.pbGraph.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbGraph.BackColor = System.Drawing.Color.White;
+            this.pbGraph.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbGraph.Location = new System.Drawing.Point(0, 40);
             this.pbGraph.Name = "pbGraph";
             this.pbGraph.Size = new System.Drawing.Size(700, 380);
